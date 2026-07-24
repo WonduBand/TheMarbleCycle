@@ -924,7 +924,7 @@
   <div class="hint">Select an album to begin</div>
 
   <div class="covers">
-    <div class="cover-card" data-album="static">
+    <div class="cover-card" data-album="static" onclick="openAlbum('static')">
       <div class="cover-frame-home" id="cf-static">
         <img src="Cover_Static.png" alt="Static" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
       </div>
@@ -935,7 +935,7 @@
         <div class="albumdesc">Noise, disconnection, and reaching through anyway.</div>
       </div>
     </div>
-    <div class="cover-card" data-album="fracture">
+    <div class="cover-card" data-album="fracture" onclick="openAlbum('fracture')">
       <div class="cover-frame-home" id="cf-fracture">
         <img src="Cover_Fracture.png" alt="Fracture" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
       </div>
@@ -946,7 +946,7 @@
         <div class="albumdesc">Breaking points that don't end in ruin.</div>
       </div>
     </div>
-    <div class="cover-card" data-album="afterlight">
+    <div class="cover-card" data-album="afterlight" onclick="openAlbum('afterlight')">
       <div class="cover-frame-home" id="cf-afterlight">
         <img src="Cover_Afterlight.png" alt="Afterlight" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
       </div>
@@ -969,7 +969,7 @@
 
   <div class="cover-section">
     <div class="cover-frame hud-frame" id="playerCoverFrame">
-      <img id="playerCover" src="" alt="" onerror="document.getElementById('playerCoverFrame').innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
+      <img id="playerCover" src="" alt="">
     </div>
     <div class="album-title" id="albumTitle"></div>
     <div class="album-sub" id="albumSub"></div>
@@ -1174,7 +1174,13 @@ function viewTrack(albumKey, index){
 function openAlbum(albumKey){
   currentAlbum = albumKey;
   const album = DATA[albumKey];
-  document.getElementById('playerCover').src = COVERS[albumKey];
+
+  const coverFrame = document.getElementById('playerCoverFrame');
+  coverFrame.innerHTML = `<img id="playerCover" src="${COVERS[albumKey]}" alt="${album.title}">`;
+  document.getElementById('playerCover').addEventListener('error', () => {
+    coverFrame.innerHTML = `<div class="cover-placeholder"><div class="ring-pulse-cv"></div><div class="cp-text">Cover Coming Soon</div></div>`;
+  }, { once: true });
+
   document.getElementById('albumTitle').textContent = album.title;
   document.getElementById('albumSub').textContent = ALBUM_META[albumKey].desc;
   document.getElementById('albumMeta').innerHTML = `${album.songs.length} Tracks`;
