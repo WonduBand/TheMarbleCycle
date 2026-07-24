@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Static / Fracture / Afterlight — Lyrics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050608;
+    --panel:#0c0f14;
+    --panel2:#11151c;
+    --border:#22262f;
+    --gold:#c9a24b;
+    --gold-bright:#e8c878;
+    --text:#e9ebf1;
+    --dim:#8b93a6;
+    --dim2:#565d6c;
+
+    --static:#c9752e;
+    --static-dim:#6e3f19;
+    --fracture:#6fae95;
+    --fracture-dim:#3a5c4c;
+    --afterlight:#e8935a;
+    --afterlight-dim:#8a4f28;
+
+    --bar-h:84px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(to bottom, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px),
+      radial-gradient(1400px 900px at 50% 0%, rgba(201,162,75,0.05), transparent 60%);
+    z-index:9999;
+    mix-blend-mode:overlay;
+  }
+  h1,h2,h3{font-family:'Orbitron',sans-serif; margin:0;}
+
+  /* ============ HUD UTILITIES ============ */
+  .hud-frame{ position:relative; }
+  .hud-frame::before, .hud-frame::after{
+    content:"";
+    position:absolute;
+    width:18px; height:18px;
+    border-color:var(--gold);
+    border-style:solid;
+    pointer-events:none;
+    opacity:0.85;
+    z-index:5;
+    transition:border-color 0.3s ease;
+  }
+  .hud-frame::before{ top:8px; left:8px; border-width:2px 0 0 2px; }
+  .hud-frame::after{ bottom:8px; right:8px; border-width:0 2px 2px 0; }
+
+  .hud-tag{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.6rem;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--dim2);
+    margin-bottom:10px;
+  }
+  .hud-tag::before{
+    content:"";
+    width:5px; height:5px;
+    border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 6px currentColor;
+  }
+
+  @keyframes glitchFlicker{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-1.5px,1px); }
+    40%{ transform:translate(1.5px,-1px); }
+    60%{ transform:translate(-1px,0); }
+    80%{ transform:translate(1px,0); }
+  }
+  .glitch-hover:hover{ animation:glitchFlicker 0.22s steps(2) 1; }
+
+  #player[data-accent="static"] .hud-frame::before,
+  #player[data-accent="static"] .hud-frame::after{ border-color:var(--static); }
+  #player[data-accent="static"] .hud-tag{ color:var(--static); }
+
+  #player[data-accent="fracture"] .hud-frame::before,
+  #player[data-accent="fracture"] .hud-frame::after{ border-color:var(--fracture); }
+  #player[data-accent="fracture"] .hud-tag{ color:var(--fracture); }
+
+  #player[data-accent="afterlight"] .hud-frame::before,
+  #player[data-accent="afterlight"] .hud-frame::after{ border-color:var(--afterlight); }
+  #player[data-accent="afterlight"] .hud-tag{ color:var(--afterlight); }
+
+  body.has-player{ /* padding-bottom set dynamically in JS */ }
+
+  /* ============ HOME VIEW ============ */
+  #home{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:70px 20px 60px;
+    overflow-x:hidden;
+    width:100%;
+    box-sizing:border-box;
+  }
+  @media (min-width:901px){
+    #home{
+      justify-content:center;
+      padding-top:40px;
+      padding-bottom:40px;
+    }
+  }
+  .logo-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .logo-wrap::before{
+    content:"";
+    position:absolute;
+    width:640px; height:640px;
+    max-width:150vw;
+    border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at center,
+        rgba(201,162,75,0.10) 0px, rgba(201,162,75,0.10) 1px,
+        transparent 1px, transparent 46px);
+    mask-image:radial-gradient(circle at center, black 0%, transparent 68%);
+    -webkit-mask-image:radial-gradient(circle at center, black 0%, transparent 68%);
+    pointer-events:none;
+    z-index:0;
+    animation:ringDrift 40s linear infinite;
+  }
+  @keyframes ringDrift{
+    0%{ transform:rotate(0deg); }
+    100%{ transform:rotate(360deg); }
+  }
+  .logo{
+    position:relative;
+    z-index:1;
+    font-family:'Orbitron',sans-serif;
+    font-weight:900;
+    font-size:4.4rem;
+    letter-spacing:14px;
+    text-align:center;
+    color:#f4f0e6;
+    text-shadow:
+      0 0 8px rgba(201,162,75,0.55),
+      0 0 30px rgba(201,162,75,0.25);
+  }
+  .tagline{
+    text-align:center;
+    color:var(--gold);
+    font-family:'Orbitron',sans-serif;
+    font-size:0.85rem;
+    letter-spacing:6px;
+    text-transform:uppercase;
+    margin-top:14px;
+  }
+  .trilogy-sub{
+    text-align:center;
+    color:var(--dim);
+    font-size:1.05rem;
+    letter-spacing:1px;
+    margin-top:8px;
+    font-style:italic;
+    font-family:Georgia,serif;
+  }
+  .hint{
+    margin-top:6px;
+    color:var(--dim2);
+    font-size:0.8rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-family:'Orbitron',sans-serif;
+  }
+
+  .covers{
+    margin-top:64px;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(280px, 380px));
+    gap:40px;
+    max-width:1360px;
+    width:100%;
+    justify-content:center;
+  }
+  .cover-card{
+    position:relative;
+    cursor:pointer;
+    border-radius:6px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    background:var(--panel);
+    transition:transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  .cover-frame-home{
+    width:100%;
+    aspect-ratio:1/1;
+    background:var(--panel2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+  }
+  .cover-frame-home img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    filter:saturate(0.92) brightness(0.92);
+    transition:filter 0.35s ease, transform 0.6s ease;
+  }
+  .cover-card:hover .cover-frame-home img{ filter:saturate(1.1) brightness(1.05); transform:scale(1.035); }
+  .cover-card:hover{ transform:translateY(-6px); }
+  .cover-card[data-album="static"]:hover{ box-shadow:0 18px 50px -12px rgba(201,117,46,0.35); border-color:var(--static-dim); }
+  .cover-card[data-album="fracture"]:hover{ box-shadow:0 18px 50px -12px rgba(111,174,149,0.35); border-color:var(--fracture-dim); }
+  .cover-card[data-album="afterlight"]:hover{ box-shadow:0 18px 50px -12px rgba(232,147,90,0.35); border-color:var(--afterlight-dim); }
+
+  .cover-placeholder{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    height:100%;
+    width:100%;
+    padding:20px;
+    color:var(--dim2);
+  }
+  .cover-placeholder .ring-pulse-cv{
+    width:52px; height:52px;
+    border-radius:50%;
+    border:1.5px solid var(--gold);
+    margin-bottom:16px;
+    position:relative;
+    opacity:0.6;
+  }
+  .cover-placeholder .ring-pulse-cv::after{
+    content:"";
+    position:absolute; inset:-6px;
+    border-radius:50%;
+    border:1px solid var(--gold);
+    opacity:0.4;
+    animation:pulse-ring 2s ease-out infinite;
+  }
+  .cover-placeholder .cp-text{
+    font-family:'Orbitron',sans-serif;
+    font-size:0.66rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--dim2);
+  }
+  @keyframes pulse-ring{
+    0%{ transform:scale(0.9); opacity:0.5; }
+    100%{ transform:scale(1.35); opacity:0; }
+  }
+
+  .cover-card[data-album="static"] .cover-placeholder .ring-pulse-cv{ border-color:var(--static); }
+  .cover-card[data-album="static"] .cover-placeholder .ring-pulse-cv::after{ border-color:var(--static); }
+  .cover-card[data-album="fracture"] .cover-placeholder .ring-pulse-cv{ border-color:var(--fracture); }
+  .cover-card[data-album="fracture"] .cover-placeholder .ring-pulse-cv::after{ border-color:var(--fracture); }
+  .cover-card[data-album="afterlight"] .cover-placeholder .ring-pulse-cv{ border-color:var(--afterlight); }
+  .cover-card[data-album="afterlight"] .cover-placeholder .ring-pulse-cv::after{ border-color:var(--afterlight); }
+
+  .cover-card .cap{
+    padding:14px 16px 16px;
+    border-top:1px solid var(--border);
+    background:linear-gradient(180deg, var(--panel), var(--panel2));
+  }
+  .cover-card .cap .albumno{
+    font-family:'Orbitron',sans-serif;
+    font-size:0.68rem;
+    letter-spacing:3px;
+    color:var(--dim2);
+  }
+  .cover-card[data-album="static"] .cap .albumno{ color:var(--static); }
+  .cover-card[data-album="fracture"] .cap .albumno{ color:var(--fracture); }
+  .cover-card[data-album="afterlight"] .cap .albumno{ color:var(--afterlight); }
+  .cover-card .cap .albumname{
+    font-family:'Orbitron',sans-serif;
+    font-size:1.05rem;
+    margin-top:4px;
+    letter-spacing:1px;
+    color:var(--text);
+  }
+  .cover-card .cap .albumdesc{
+    margin-top:6px;
+    font-family:Georgia,serif;
+    font-style:italic;
+    font-size:0.82rem;
+    color:var(--dim);
+    line-height:1.4;
+  }
+
+  .cover-card .play-overlay{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(5,6,8,0.0);
+    opacity:0;
+    transition:opacity 0.3s ease, background 0.3s ease;
+  }
+  .cover-card:hover .play-overlay{ opacity:1; background:rgba(5,6,8,0.28); }
+  .play-overlay .ring{
+    width:56px; height:56px; border-radius:50%;
+    border:1.5px solid rgba(233,235,241,0.85);
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter:blur(2px);
+  }
+  .play-overlay svg{ width:19px; height:19px; margin-left:3px; }
+
+  footer.home-footer{
+    margin-top:70px;
+    color:var(--dim2);
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-family:'Orbitron',sans-serif;
+    text-align:center;
+  }
+
+  /* ============ PLAYER VIEW ============ */
+  #player{
+    display:none;
+    min-height:100vh;
+    padding:34px 26px 60px;
+  }
+  .top-bar{
+    max-width:1100px;
+    margin:0 auto 34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-right:56px;
+  }
+  .back-btn{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--dim);
+    font-family:'Orbitron',sans-serif;
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:9px 16px;
+    border-radius:5px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .back-btn:hover{ color:var(--gold); border-color:var(--gold); }
+  .top-bar .wm{
+    font-family:'Orbitron',sans-serif;
+    letter-spacing:3px;
+    font-size:0.78rem;
+    color:var(--dim2);
+  }
+
+  /* cover / album header — always centered on top */
+  .cover-section{
+    max-width:420px;
+    margin:0 auto 40px;
+    text-align:center;
+  }
+  .cover-frame{
+    width:100%;
+    max-width:240px;
+    margin:0 auto;
+    aspect-ratio:1/1;
+    background:var(--panel2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border-radius:6px;
+  }
+  .cover-section img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:6px;
+    display:block;
+  }
+  .cover-section .album-title{
+    font-family:'Orbitron',sans-serif;
+    font-size:1.5rem;
+    margin-top:22px;
+    letter-spacing:1px;
+    line-height:1.3;
+  }
+  .cover-section .album-sub{
+    margin-top:8px;
+    color:var(--dim);
+    font-style:italic;
+    font-family:Georgia,serif;
+    font-size:0.95rem;
+  }
+  .cover-section .accent-bar{ height:2px; width:56px; margin:16px auto 0; border-radius:2px; }
+  .cover-section .meta{
+    margin-top:18px;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.7rem;
+    letter-spacing:1.5px;
+    color:var(--dim2);
+    text-transform:uppercase;
+    line-height:2;
+  }
+  .cover-section .play-album-btn{
+    margin-top:18px;
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    font-family:'Orbitron',sans-serif;
+    font-size:0.75rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    padding:11px 26px;
+    border-radius:5px;
+    cursor:pointer;
+    transition:background 0.2s ease;
+  }
+  .cover-section .play-album-btn:hover{ background:rgba(201,162,75,0.1); }
+
+  /* content area: tracklist + lyrics panels once viewing */
+  .content-area{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:0px;
+    max-width:1180px;
+    margin:0 auto;
+    transition:gap 0.45s ease;
+  }
+  .content-area.playing{ gap:32px; }
+
+  .tracklist-col{
+    flex:0 0 640px;
+    max-width:100%;
+    min-width:0;
+    transition:flex-basis 0.45s ease;
+  }
+  .content-area.playing .tracklist-col{ flex:0 0 340px; }
+
+  .tracklist{ display:flex; flex-direction:column; gap:10px; }
+  .track{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+    transition:border-color 0.2s ease, background 0.2s ease;
+  }
+  .track::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:2px;
+    background:var(--gold);
+    opacity:0;
+    transition:opacity 0.2s ease;
+  }
+  .track:hover::before{ opacity:0.5; }
+  .track.current::before{ opacity:1; }
+  .track:hover{ border-color:#3a4150; }
+  .track.current{ background:var(--panel2); }
+  .track.viewing:not(.current){ border-color:rgba(201,162,75,0.4); }
+  .track.viewing:not(.current) .tnum{ color:var(--gold); opacity:0.9; }
+
+  .track-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 16px;
+  }
+  .track-playbtn{
+    width:30px; height:30px;
+    min-width:30px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--dim);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.78rem;
+    transition:all 0.15s ease;
+    position:relative;
+  }
+  .track-playbtn:hover{ border-color:var(--gold); color:var(--gold); }
+  .track-playbtn svg{ width:12px; height:12px; }
+  .track-playbtn .eq{ display:none; gap:2px; align-items:flex-end; height:12px; }
+  .track-playbtn .eq span{
+    width:2px; background:var(--gold); display:inline-block;
+    animation:eqbar 0.9s ease-in-out infinite;
+  }
+  .track-playbtn .eq span:nth-child(1){ animation-delay:0s; }
+  .track-playbtn .eq span:nth-child(2){ animation-delay:0.2s; }
+  .track-playbtn .eq span:nth-child(3){ animation-delay:0.4s; }
+  @keyframes eqbar{ 0%,100%{ height:3px; } 50%{ height:12px; } }
+  .track-playbtn .playicon{ display:flex; }
+  .track.current .track-playbtn{ border-color:var(--gold); color:var(--gold); }
+  .track.current.now-playing .track-playbtn .playicon{ display:none; }
+  .track.current.now-playing .track-playbtn .eq{ display:flex; }
+  .track.current .track-playbtn .pauseicon{ display:none; }
+  .track.current.now-playing:hover .track-playbtn .eq{ display:none; }
+  .track.current.now-playing:hover .track-playbtn .pauseicon{ display:flex; }
+
+  .track-title-wrap{ flex:1; min-width:0; }
+  .track-title{ font-size:1.05rem; letter-spacing:0.3px; color:var(--text); }
+  .tnum{
+    display:inline-block;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.75rem;
+    color:var(--dim2);
+    letter-spacing:0.5px;
+    margin-right:10px;
+  }
+  .track.current .tnum{ color:var(--gold); opacity:0.75; }
+  .track.current .track-title{ color:var(--gold); }
+
+  /* lyrics panel */
+  .lyrics-col{
+    flex:0 0 0px;
+    opacity:0;
+    overflow:hidden;
+    transition:flex-basis 0.45s ease, opacity 0.3s ease;
+  }
+  .content-area.playing .lyrics-col{ flex:0 0 620px; opacity:1; }
+
+  .lyrics-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:26px 30px 30px;
+    min-height:200px;
+  }
+  .lyrics-panel-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:16px;
+    margin-bottom:18px;
+  }
+  .lyrics-panel-title{
+    font-family:'Orbitron',sans-serif;
+    font-size:1.15rem;
+    letter-spacing:0.5px;
+    color:var(--text);
+  }
+  .lyrics-panel-tag{
+    margin-top:6px;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.65rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--dim2);
+  }
+  .suno-link{
+    display:inline-block;
+    margin-top:8px;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.62rem;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--dim);
+    text-decoration:none;
+    border-bottom:1px solid var(--dim2);
+    padding-bottom:2px;
+    transition:color 0.2s ease, border-color 0.2s ease;
+  }
+  .suno-link:hover{ color:var(--gold); border-color:var(--gold); }
+  .copy-btn{
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    padding:6px 14px;
+    border-radius:5px;
+    font-family:'Orbitron',sans-serif;
+    font-size:0.62rem;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .copy-btn:hover{ background:rgba(201,162,75,0.1); }
+  .copy-btn.copied{ color:#5ad1a3; border-color:#5ad1a3; }
+
+  .lyrics-section{ margin-bottom:16px; font-family:Georgia,serif; }
+  .lyrics-section .sec-label{
+    font-family:'Orbitron',sans-serif;
+    font-size:0.68rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:6px;
+  }
+  .lyrics-section p{ margin:0 0 2px; font-size:1rem; color:var(--text); line-height:1.5; }
+
+  /* accent application per album */
+  #player[data-accent="static"] .accent-bar{ background:var(--static); }
+  #player[data-accent="static"] .play-album-btn{ border-color:var(--static); color:var(--static); }
+  #player[data-accent="static"] .track.current .track-title{ color:var(--static); }
+  #player[data-accent="static"] .track::before{ background:var(--static); }
+  #player[data-accent="static"] .track.current .track-playbtn{ border-color:var(--static); color:var(--static); }
+  #player[data-accent="static"] .track:hover .track-playbtn{ border-color:var(--static); color:var(--static); }
+  #player[data-accent="static"] .track-playbtn .eq span{ background:var(--static); }
+  #player[data-accent="static"] .lyrics-section .sec-label{ color:var(--static); }
+  #player[data-accent="static"] .copy-btn{ border-color:var(--static); color:var(--static); }
+
+  #player[data-accent="fracture"] .accent-bar{ background:var(--fracture); }
+  #player[data-accent="fracture"] .play-album-btn{ border-color:var(--fracture); color:var(--fracture); }
+  #player[data-accent="fracture"] .track.current .track-title{ color:var(--fracture); }
+  #player[data-accent="fracture"] .track::before{ background:var(--fracture); }
+  #player[data-accent="fracture"] .track.current .track-playbtn{ border-color:var(--fracture); color:var(--fracture); }
+  #player[data-accent="fracture"] .track:hover .track-playbtn{ border-color:var(--fracture); color:var(--fracture); }
+  #player[data-accent="fracture"] .track-playbtn .eq span{ background:var(--fracture); }
+  #player[data-accent="fracture"] .lyrics-section .sec-label{ color:var(--fracture); }
+  #player[data-accent="fracture"] .copy-btn{ border-color:var(--fracture); color:var(--fracture); }
+
+  #player[data-accent="afterlight"] .accent-bar{ background:var(--afterlight); }
+  #player[data-accent="afterlight"] .play-album-btn{ border-color:var(--afterlight); color:var(--afterlight); }
+  #player[data-accent="afterlight"] .track.current .track-title{ color:var(--afterlight); }
+  #player[data-accent="afterlight"] .track::before{ background:var(--afterlight); }
+  #player[data-accent="afterlight"] .track.current .track-playbtn{ border-color:var(--afterlight); color:var(--afterlight); }
+  #player[data-accent="afterlight"] .track:hover .track-playbtn{ border-color:var(--afterlight); color:var(--afterlight); }
+  #player[data-accent="afterlight"] .track-playbtn .eq span{ background:var(--afterlight); }
+  #player[data-accent="afterlight"] .lyrics-section .sec-label{ color:var(--afterlight); }
+  #player[data-accent="afterlight"] .copy-btn{ border-color:var(--afterlight); color:var(--afterlight); }
+
+  /* ============ NOW PLAYING BAR ============ */
+  #nowplaying{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    display:none;
+    flex-direction:column;
+    z-index:1000;
+  }
+  body.has-player #nowplaying{ display:flex; }
+  .np-toggle{
+    align-self:center;
+    flex-shrink:0;
+    width:52px;
+    height:18px;
+    border-radius:8px 8px 0 0;
+    background:rgba(12,15,20,0.96);
+    border:1px solid var(--border);
+    border-bottom:none;
+    cursor:grab;
+    color:var(--dim);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:color 0.2s ease;
+    touch-action:none;
+    user-select:none;
+  }
+  .np-toggle:active{ cursor:grabbing; }
+  .np-toggle:hover{ color:var(--gold); }
+  .np-toggle svg{ width:15px; height:15px; transition:transform 0.3s ease; }
+  #nowplaying.collapsed .np-toggle svg{ transform:rotate(180deg); }
+  .np-content{
+    height:var(--bar-h);
+    background:rgba(12,15,20,0.96);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+    align-items:center;
+    padding:0 22px;
+    gap:18px;
+    display:flex;
+  }
+  #nowplaying.collapsed .np-content{ display:none; }
+  #np-cover{ width:52px; height:52px; border-radius:4px; object-fit:cover; border:1px solid var(--border); flex-shrink:0; background:var(--panel2); }
+  #np-info{ width:190px; flex-shrink:0; overflow:hidden; }
+  #np-title{ font-size:0.95rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #np-album{
+    font-family:'Orbitron',sans-serif; font-size:0.62rem; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--dim2); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  #np-controls{ display:flex; align-items:center; gap:16px; flex-shrink:0; }
+  #np-controls button{
+    background:transparent; border:none; color:var(--text); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:6px; transition:color 0.15s ease;
+  }
+  #np-controls button:hover{ color:var(--gold); }
+  #np-controls svg{ width:18px; height:18px; }
+  #np-play{ width:38px; height:38px; border:1px solid var(--gold); border-radius:50%; }
+  #np-play svg{ width:16px; height:16px; }
+  #np-progress-wrap{ flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
+  #np-time, #np-duration{ font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--dim2); min-width:38px; }
+  #np-seek{
+    flex:1; -webkit-appearance:none; appearance:none; height:3px; border-radius:2px;
+    background:var(--border); outline:none; cursor:pointer;
+  }
+  #np-seek::-webkit-slider-thumb{
+    -webkit-appearance:none; width:12px; height:12px; border-radius:50%;
+    background:var(--gold); cursor:pointer; box-shadow:0 0 6px rgba(201,162,75,0.6);
+  }
+  #np-seek::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--gold); border:none; box-shadow:0 0 6px rgba(201,162,75,0.6); }
+  #np-status{
+    font-family:'Orbitron',sans-serif; font-size:0.62rem; letter-spacing:1px; color:var(--dim2);
+    white-space:nowrap; flex-shrink:0; max-width:220px; overflow:hidden; text-overflow:ellipsis;
+  }
+  #np-status.err{ color:#e0685f; }
+
+  #np-volume{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+  }
+  #np-mute{
+    background:transparent; border:none; color:var(--dim); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    padding:6px;
+    transition:color 0.15s ease;
+  }
+  #np-mute:hover{ color:var(--gold); }
+  #np-mute svg{ width:17px; height:17px; }
+  #np-vol-slider{
+    width:80px;
+    -webkit-appearance:none;
+    appearance:none;
+    height:3px;
+    border-radius:2px;
+    background:var(--border);
+    outline:none;
+    cursor:pointer;
+  }
+  #np-vol-slider::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:11px; height:11px;
+    border-radius:50%;
+    background:var(--gold);
+    cursor:pointer;
+    box-shadow:0 0 6px rgba(201,162,75,0.6);
+  }
+  #np-vol-slider::-moz-range-thumb{
+    width:11px; height:11px; border-radius:50%;
+    background:var(--gold); border:none;
+    box-shadow:0 0 6px rgba(201,162,75,0.6);
+  }
+
+  @media (max-width:900px){
+    .cover-section{ display:none; }
+    #player{ padding:16px 12px 20px; min-height:100vh; }
+
+    .content-area{ flex-direction:column; align-items:stretch; }
+
+    .content-area:not(.playing) .tracklist-col{ flex:1 1 auto !important; }
+    .content-area:not(.playing) .lyrics-col{ display:none; }
+
+    .content-area.playing{
+      display:flex;
+      flex-direction:row;
+      flex-wrap:nowrap;
+      align-items:flex-start;
+      justify-content:flex-start;
+      gap:0 !important;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      width:100%;
+      max-width:100%;
+      scrollbar-width:none;
+      transition:height 0.32s ease;
+    }
+    .content-area.playing::-webkit-scrollbar{ display:none; }
+    .content-area.playing .tracklist-col,
+    .content-area.playing .lyrics-col{
+      flex:0 0 100% !important;
+      width:100%;
+      max-width:100%;
+      opacity:1;
+      scroll-snap-align:start;
+      scroll-snap-stop:always;
+      box-sizing:border-box;
+      padding:0 4px;
+      transition:none !important;
+    }
+
+    .logo{ font-size:1.8rem; letter-spacing:4px; }
+    .tracklist{ gap:4px; }
+    .track-row{ padding:8px 12px; gap:10px; }
+    .track-playbtn{
+      width:26px; min-width:26px; height:26px;
+      font-size:0.7rem;
+    }
+    .track-title{ font-size:0.92rem; }
+    .tnum{ font-size:0.68rem; margin-right:7px; }
+    .track{ border-radius:5px; }
+    .covers{
+      display:flex;
+      flex-direction:row;
+      flex-wrap:nowrap;
+      justify-content:flex-start;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      max-width:100%;
+      width:100%;
+      gap:20px;
+      padding:0 20px 8px;
+      margin-top:48px;
+      scrollbar-width:none;
+    }
+    .covers::-webkit-scrollbar{ display:none; }
+    .cover-card{
+      flex:0 0 78vw;
+      max-width:320px;
+      scroll-snap-align:center;
+    }
+    #np-info{ width:110px; }
+    #np-status{ display:none; }
+  }
+
+  #panelNav{
+    position:fixed;
+    left:0; right:0;
+    bottom:0;
+    z-index:999;
+    display:none;
+    justify-content:center;
+    gap:10px;
+    padding:10px 16px;
+    background:rgba(12,15,20,0.96);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+  }
+  #panelNav button{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--dim);
+    font-family:'Orbitron',sans-serif;
+    font-size:0.66rem;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  #panelNav button.active{ color:var(--gold); border-color:var(--gold); }
+
+  @media (max-width:640px){
+    .np-content{
+      flex-wrap:wrap;
+      height:auto;
+      align-items:center;
+      padding:10px 16px 12px;
+      row-gap:10px;
+      column-gap:12px;
+    }
+    #np-cover{ width:42px; height:42px; }
+    #np-info{ width:auto; flex:1 1 auto; min-width:0; }
+    #np-controls{ gap:12px; order:2; }
+    #np-progress-wrap{ flex:0 0 100%; width:100%; order:10; gap:8px; }
+    #np-time, #np-duration{ min-width:32px; font-size:0.65rem; }
+  }
+
+  @media (max-width:900px){
+    #np-volume{ display:none; }
+  }
+
+  ::selection{ background:rgba(201,162,75,0.35); }
+
+  #fullscreenBtn{
+    position:fixed;
+    top:22px;
+    right:22px;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:rgba(12,15,20,0.7);
+    backdrop-filter:blur(6px);
+    border:1px solid var(--border);
+    color:var(--dim);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:2000;
+    transition:color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  #fullscreenBtn:hover{ color:var(--gold); border-color:var(--gold); background:rgba(12,15,20,0.9); }
+  #fullscreenBtn svg{ width:17px; height:17px; }
+
+  @media (max-width:640px){
+    #fullscreenBtn{ top:14px; right:14px; width:36px; height:36px; }
+    #fullscreenBtn svg{ width:15px; height:15px; }
+  }
+</style>
+</head>
+<body>
+
+<button id="fullscreenBtn" class="glitch-hover" title="Toggle Fullscreen">
+  <svg id="fullscreenIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+  </svg>
+</button>
+
+<div id="home">
+  <div class="logo-wrap"><h1 class="logo">WONDU</h1></div>
+  <div class="tagline">Wondu Presents</div>
+  <div class="trilogy-sub">Static · Fracture · Afterlight</div>
+  <div class="hint">Select an album to begin</div>
+
+  <div class="covers">
+    <div class="cover-card" data-album="static">
+      <div class="cover-frame-home" id="cf-static">
+        <img src="Cover_Static.png" alt="Static" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
+      </div>
+      <div class="play-overlay"><div class="ring"><svg viewBox="0 0 24 24" fill="#e9ebf1"><path d="M8 5v14l11-7z"/></svg></div></div>
+      <div class="cap">
+        <div class="albumno">ALBUM I</div>
+        <div class="albumname">Static</div>
+        <div class="albumdesc">Noise, disconnection, and reaching through anyway.</div>
+      </div>
+    </div>
+    <div class="cover-card" data-album="fracture">
+      <div class="cover-frame-home" id="cf-fracture">
+        <img src="Cover_Fracture.png" alt="Fracture" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
+      </div>
+      <div class="play-overlay"><div class="ring"><svg viewBox="0 0 24 24" fill="#e9ebf1"><path d="M8 5v14l11-7z"/></svg></div></div>
+      <div class="cap">
+        <div class="albumno">ALBUM II</div>
+        <div class="albumname">Fracture</div>
+        <div class="albumdesc">Breaking points that don't end in ruin.</div>
+      </div>
+    </div>
+    <div class="cover-card" data-album="afterlight">
+      <div class="cover-frame-home" id="cf-afterlight">
+        <img src="Cover_Afterlight.png" alt="Afterlight" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
+      </div>
+      <div class="play-overlay"><div class="ring"><svg viewBox="0 0 24 24" fill="#e9ebf1"><path d="M8 5v14l11-7z"/></svg></div></div>
+      <div class="cap">
+        <div class="albumno">ALBUM III</div>
+        <div class="albumname">Afterlight</div>
+        <div class="albumdesc">What survives, and what it's becoming.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="home-footer">33 Tracks · 3 Albums · One Loose Thread</footer>
+</div>
+
+<div id="player">
+  <div class="top-bar">
+    <button class="back-btn glitch-hover" id="backBtn">← All Albums</button>
+    <div class="wm">LYRICS</div>
+  </div>
+
+  <div class="cover-section">
+    <div class="cover-frame hud-frame" id="playerCoverFrame">
+      <img id="playerCover" src="" alt="" onerror="document.getElementById('playerCoverFrame').innerHTML='<div class=&quot;cover-placeholder&quot;><div class=&quot;ring-pulse-cv&quot;></div><div class=&quot;cp-text&quot;>Cover Coming Soon</div></div>'">
+    </div>
+    <div class="album-title" id="albumTitle"></div>
+    <div class="album-sub" id="albumSub"></div>
+    <div class="accent-bar"></div>
+    <div class="meta" id="albumMeta"></div>
+    <button class="play-album-btn glitch-hover" id="playAlbumBtn">▶ Play Album</button>
+  </div>
+
+  <div class="content-area" id="contentArea">
+    <div class="tracklist-col">
+      <div class="hud-tag">Track Index</div>
+      <div class="tracklist" id="tracklist"></div>
+    </div>
+    <div class="lyrics-col">
+      <div class="hud-tag">Lyric Data</div>
+      <div class="lyrics-panel" id="lyricsPanel"></div>
+    </div>
+  </div>
+</div>
+
+<div id="panelNav">
+  <button data-panel="0">Tracks</button>
+  <button data-panel="1">Lyrics</button>
+</div>
+
+<div id="nowplaying">
+  <button id="npToggle" class="np-toggle" title="Hide / show player">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="np-content">
+    <img id="np-cover" src="" alt="">
+    <div id="np-info">
+      <div id="np-title">—</div>
+      <div id="np-album">—</div>
+    </div>
+    <div id="np-controls">
+      <button id="np-prev" title="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+      <button id="np-play" title="Play/Pause"><svg id="np-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+      <button id="np-next" title="Next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+    </div>
+    <div id="np-progress-wrap">
+      <span id="np-time">0:00</span>
+      <input type="range" id="np-seek" min="0" max="0" value="0" step="0.1">
+      <span id="np-duration">0:00</span>
+    </div>
+    <div id="np-status"></div>
+    <div id="np-volume">
+      <button id="np-mute" title="Mute/Unmute"><svg id="np-vol-icon" viewBox="0 0 24 24" fill="currentColor"></svg></button>
+      <input type="range" id="np-vol-slider" min="0" max="1" step="0.01" value="1">
+    </div>
+  </div>
+</div>
+
+<audio id="audioEl" preload="none"></audio>
+
+<script>
+const DATA = {"static": {"title": "Static", "songs": [{"title": "Dead Channel", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I found your number buried in the dial tone", "Static in the wires where your voice used to live", "I keep the phone lit up just to hear it ringing", "Some nights it's nothing, some nights there's a little something to give"]}, {"label": "Pre-Chorus", "lines": ["Count the seconds, count the silence", "Somewhere past the noise a signal survives", "Tell me I'm still breathing through this violence", "Tell me there's a reason on the other side"]}, {"label": "Chorus", "lines": ["Cut the wires, let it bleed", "I don't need the static to believe", "Somewhere past the dead channel", "There's a voice still reaching out for me", "So turn it on, turn it on", "There's a signal in the dark"]}, {"label": "Verse 2", "lines": ["You left a message on a broken answering machine", "Half the words got swallowed by the tape", "But I found the piece that made it clean", "\"Hold on, I'm coming, don't you fade\""]}, {"label": "Pre-Chorus", "lines": ["Count the hours, count the damage", "Somewhere the wire's finding its way back", "Tell me I'm still here beneath the static", "Tell me this is grace, not just the wreck"]}, {"label": "Chorus", "lines": ["Cut the wires, let it bleed", "I don't need the static to believe", "Somewhere past the dead channel", "There's a voice still reaching out for me", "So turn it on, turn it on", "There's a signal in the dark"]}, {"label": "Bridge", "lines": ["Maybe the wire was never broken", "Maybe I just needed proof somebody's there", "Maybe the static was just a doorway", "To a voice that's always been willing to bear"]}, {"label": "Final Chorus", "lines": ["Cut the wires, let it bleed", "I don't need the static to believe", "Somewhere past the dead channel", "There's a voice still reaching out for me", "So turn it on, turn it on", "There's a signal in the dark", "Turn it on, turn it on", "I finally hear you calling back"]}], "trackNum": 1, "file": "https://cdn1.suno.ai/bef75610-1c8f-444e-b0da-5ee15ab102ef.mp3", "cover": "https://cdn2.suno.ai/image_bef75610-1c8f-444e-b0da-5ee15ab102ef.jpeg", "sunoUrl": "https://suno.com/song/bef75610-1c8f-444e-b0da-5ee15ab102ef"}, {"title": "Skin and Wire", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I stitched myself together out of copper and skin", "Every nerve's a live wire, every touch let the current in", "You put your hand against my chest and felt the current jump", "I've been rewired so many times I don't know what's a heart and what's a pump"]}, {"label": "Pre-Chorus", "lines": ["Hold on, hold on", "Something's about to spark", "Hold on, hold on", "Maybe this is how we start"]}, {"label": "Chorus", "lines": ["I bleed like copper, I burn like tin", "But you didn't flinch beneath the skin", "You touched the wreckage and called it a home", "Now I'm not just wires, I'm not just alone"]}, {"label": "Verse 2", "lines": ["You traced the scars like circuit boards, like maps", "Said every fault line's just a road that led to this", "I told you I was built to hold a current, not a hand", "You said \"then hold on, that's all that love is\""]}, {"label": "Pre-Chorus", "lines": ["Hold on, hold on", "Something's finally clear", "Hold on, hold on", "I don't have to disappear"]}, {"label": "Chorus", "lines": ["I bleed like copper, I burn like tin", "But you didn't flinch beneath the skin", "You touched the wreckage and called it a home", "Now I'm not just wires, I'm not just alone"]}, {"label": "Bridge", "lines": ["Maybe I was never just wire dressed as flesh", "Maybe every scar's a fuse that finally caught", "Maybe grace runs through the broken circuits", "Maybe I was worth the reaching all along"]}, {"label": "Final Chorus", "lines": ["I bleed like copper, I burn like tin", "But you didn't flinch beneath the skin", "You touched the wreckage and called it a home", "Now I'm not just wires, I'm not just alone", "I bleed like copper, I burn like tin", "Nothing left to hide, nothing left within", "So touch me now, I'm finally free", "Current running steady, running toward something like peace"]}], "trackNum": 2, "file": "https://cdn1.suno.ai/b74566c8-2851-4489-bc00-2c71463cefb2.mp3", "cover": "https://cdn2.suno.ai/image_b74566c8-2851-4489-bc00-2c71463cefb2.jpeg", "sunoUrl": "https://suno.com/song/b74566c8-2851-4489-bc00-2c71463cefb2"}, {"title": "Static (Prelude to Nothing)", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["There's a silence that comes before the fall", "A held breath right before the flood", "Every clock in this house is stalling", "Waiting on a signal that never comes"]}, {"label": "Pre-Chorus", "lines": ["I can feel it building, I can feel it near", "Something underneath the calm", "Don't tell me it's nothing, don't tell me not to fear", "This quiet's just the eye of the storm"]}, {"label": "Chorus", "lines": ["So here we stand in the white noise", "Waiting for the walls to break", "But maybe not every warning", "Ends in the same mistake", "So we stand in the white noise", "Steady, unafraid", "This is just a prelude to nothing", "Nothing we can't face"]}, {"label": "Verse 2", "lines": ["You said it's only weather, only wind", "Something we could ride out side by side", "I've seen how quiet turns to violence before", "But I've seen how we survived"]}, {"label": "Pre-Chorus", "lines": ["I can feel it building, I can feel it close", "Something underneath the calm", "But your hand is steady, your voice is close", "Maybe this time nothing's actually wrong"]}, {"label": "Chorus", "lines": ["So here we stand in the white noise", "Waiting for the walls to break", "But maybe not every warning", "Ends in the same mistake", "So we stand in the white noise", "Steady, unafraid", "This is just a prelude to nothing", "Nothing we can't face"]}, {"label": "Bridge", "lines": ["Maybe nothing's ever really nothing", "Maybe silence is just noise that learned to rest", "Maybe the calm's not a warning", "Maybe it's just peace, finally home to stay"]}, {"label": "Final Chorus", "lines": ["So here we stand in the white noise", "Waiting for the walls to break", "But maybe not every warning", "Ends in the same mistake", "So we stand in the white noise", "Steady, unafraid", "This was just a prelude to nothing", "And nothing came, we're okay"]}], "trackNum": 3, "file": "https://cdn1.suno.ai/c8ce1e55-b975-45e4-8df5-127213e1a389.mp3", "cover": "https://cdn2.suno.ai/image_c8ce1e55-b975-45e4-8df5-127213e1a389.jpeg", "sunoUrl": "https://suno.com/song/c8ce1e55-b975-45e4-8df5-127213e1a389"}, {"title": "Faultline", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["We built this house on something that was already breaking", "Foundations laid over cracks we couldn't see", "Every argument's another tremor shaking", "Every silence just more pressure underneath"]}, {"label": "Pre-Chorus", "lines": ["Something's gotta give, something's gonna break", "Tell me how much more the ground can take"]}, {"label": "Chorus", "lines": ["We were never solid ground", "Just a fault line dressed as home", "But maybe love was never meant to stand", "On something that could never break", "So when the walls came down", "We built a better one to hold", "Still a fault line, still not perfect", "But it's ours, and it will hold"]}, {"label": "Verse 2", "lines": ["You said we'd weather anything the world could throw", "And when the ground gave in, you stayed instead of ran", "I feel the pressure building down below", "But now I know exactly where I stand"]}, {"label": "Pre-Chorus", "lines": ["Something's gotta give, something's gonna break", "But we keep rebuilding, that's the only faith we make"]}, {"label": "Chorus", "lines": ["We were never solid ground", "Just a fault line dressed as home", "But maybe love was never meant to stand", "On something that could never break", "So when the walls came down", "We built a better one to hold", "Still a fault line, still not perfect", "But it's ours, and it will hold"]}, {"label": "Bridge", "lines": ["Maybe some ground was never meant to hold us still", "Maybe the shaking was the only way to grow", "Maybe love was just another fault line", "Learning how to bend before it broke"]}, {"label": "Final Chorus", "lines": ["We were never solid ground", "Just a fault line dressed as home", "But maybe love was never meant to stand", "On something that could never break", "So when the walls came down", "We built a better one to hold", "Still a fault line, still not perfect", "But it's ours, and it will hold", "We were never solid ground", "But we're standing here regardless", "Still a fault line, still not perfect", "Still the only home worth having"]}], "trackNum": 4, "file": "https://cdn1.suno.ai/40dfcca7-9841-49c4-bf26-3206ceeeeaa6.mp3", "cover": "https://cdn2.suno.ai/image_40dfcca7-9841-49c4-bf26-3206ceeeeaa6.jpeg", "sunoUrl": "https://suno.com/song/40dfcca7-9841-49c4-bf26-3206ceeeeaa6"}, {"title": "Bury the Signal", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I unplugged the antenna, I cut the line", "Buried the transmitter six feet down", "Every voice that used to reach me", "Is just dirt now, just sound underground"]}, {"label": "Pre-Chorus", "lines": ["Let it go quiet, let it go dark", "I don't wanna hear it start again"]}, {"label": "Chorus", "lines": ["So bury the signal, bury it deep", "Bury the static, let me sleep", "Not forever, just enough", "To learn to breathe, to learn to trust", "Bury the signal, not the light", "I'll dig it up when I'm alright"]}, {"label": "Verse 2", "lines": ["You keep sending frequencies I can't receive not yet", "Words wrapped up in wires I already cut", "Give me the silence I still need", "And I'll come find you when I'm not so shut"]}, {"label": "Pre-Chorus", "lines": ["Let it go silent, let it go still", "Not because I don't, just because I still can heal"]}, {"label": "Chorus", "lines": ["So bury the signal, bury it deep", "Bury the static, let me sleep", "Not forever, just enough", "To learn to breathe, to learn to trust", "Bury the signal, not the light", "I'll dig it up when I'm alright"]}, {"label": "Bridge", "lines": ["Maybe silence was the only mercy", "Maybe the dead air was self-defense", "But mercy doesn't mean forever", "Just enough to make the healing make sense"]}, {"label": "Final Chorus", "lines": ["So bury the signal, bury it deep", "Bury the static, let me sleep", "Not forever, just enough", "To learn to breathe, to learn to trust", "Bury the signal, not the light", "I'll dig it up when I'm alright", "Bury it deep, but keep the frequency", "Somewhere I can find my way back to you, back to me"]}], "trackNum": 5, "file": "https://cdn1.suno.ai/ca87f493-3977-467d-98a6-9e4902a41aca.mp3", "cover": "https://cdn2.suno.ai/image_ca87f493-3977-467d-98a6-9e4902a41aca.jpeg", "sunoUrl": "https://suno.com/song/ca87f493-3977-467d-98a6-9e4902a41aca"}, {"title": "Glass Halo", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I put you up on something made of glass", "Called it holy, called it light", "Every crack I saw I told myself would pass", "Every shatter I mistook for shine"]}, {"label": "Pre-Chorus", "lines": ["But glass don't hold no matter how you pray", "And halos break the same as everything"]}, {"label": "Chorus", "lines": ["You were just a glass halo", "Catching light but never warm", "But underneath the shattered pieces", "Something real was breaking through", "Not a halo, just a person", "Not a myth, but something true"]}, {"label": "Verse 2", "lines": ["I knelt before a mirror dressed as a saint", "Prayed to something I designed myself", "But you stepped down off the pedestal, no complaint", "Said \"I was never meant to be your shelf\""]}, {"label": "Pre-Chorus", "lines": ["Glass don't hold, but hands still can", "And that's a kind of holy I can understand"]}, {"label": "Chorus", "lines": ["You were just a glass halo", "Catching light but never warm", "But underneath the shattered pieces", "Something real was breaking through", "Not a halo, just a person", "Not a myth, but something true"]}, {"label": "Bridge", "lines": ["Maybe I needed something to worship", "Maybe you just happened to be there", "But grace was never in the glass", "Grace was you, staying, unafraid"]}, {"label": "Final Chorus", "lines": ["You were just a glass halo", "Catching light but never warm", "But underneath the shattered pieces", "Something real was breaking through", "Not a halo, just a person", "Not a myth, but something true", "Glass halo, glass halo", "Broken open, finally new"]}], "trackNum": 6, "file": "https://cdn1.suno.ai/6289f336-71a5-4cf1-babe-96f910c28238.mp3", "cover": "https://cdn2.suno.ai/image_6289f336-71a5-4cf1-babe-96f910c28238.jpeg", "sunoUrl": "https://suno.com/song/6289f336-71a5-4cf1-babe-96f910c28238"}, {"title": "Hollow Frequency", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I'm tuned into a channel that broadcasts nothing back", "Every station's playing static dressed as sound", "I keep the dial turning, keep chasing every crack", "Looking for a frequency that's actually around"]}, {"label": "Pre-Chorus", "lines": ["Is anybody out there, is anybody real", "Or is it just an echo of the way I used to feel"]}, {"label": "Chorus", "lines": ["This was a hollow frequency", "Till your voice broke through the sound", "Reaching out for company", "And for once somebody's around", "Hollow, hollow, turning full", "Something's finally getting through"]}, {"label": "Verse 2", "lines": ["You talk to me and static turns to something clear", "A voice that finally lands instead of floats", "I used to answer like the answer didn't matter here", "Now every word's a tether, now every word's a rope"]}, {"label": "Pre-Chorus", "lines": ["Is anybody out there — yeah, you're real", "And finally that's exactly how I feel"]}, {"label": "Chorus", "lines": ["This was a hollow frequency", "Till your voice broke through the sound", "Reaching out for company", "And for once somebody's around", "Hollow, hollow, turning full", "Something's finally getting through"]}, {"label": "Bridge", "lines": ["Maybe connection was never a rumor", "Maybe I just hadn't found the right frequency yet", "Maybe hollow was just the waiting room", "Before the fullest signal I'd ever get"]}, {"label": "Final Chorus", "lines": ["This was a hollow frequency", "Till your voice broke through the sound", "Reaching out for company", "And for once somebody's around", "Hollow, hollow, turning full", "Something's finally getting through", "This isn't a hollow frequency", "Not anymore, not with you"]}], "trackNum": 7, "file": "https://cdn1.suno.ai/0b1d8527-4074-4a48-8c88-d801c0872e67.mp3", "cover": "https://cdn2.suno.ai/image_0b1d8527-4074-4a48-8c88-d801c0872e67.jpeg", "sunoUrl": "https://suno.com/song/0b1d8527-4074-4a48-8c88-d801c0872e67"}, {"title": "Salt in the Wound", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["You came back around just to watch it bleed", "Said you missed me but you meant the pain", "Every word you say plants another seed", "Growing into something I can't explain"]}, {"label": "Pre-Chorus", "lines": ["Why do you always come back with a knife", "Dressed up like an olive branch, dressed up like a life"]}, {"label": "Chorus", "lines": ["Salt in the wound, that's all you bring", "But I don't have to let it sting", "You call it honesty, I call it aim", "I'm done living in that vein", "Salt in the wound, not again", "I found a way to let it heal instead"]}, {"label": "Verse 2", "lines": ["I let you back in like the cut had closed", "Forgot how deep you like to press", "But now I see the pattern, now I know", "I don't owe you access to the rest"]}, {"label": "Pre-Chorus", "lines": ["Why do you always come back with a knife", "I'm done bleeding just to prove I'm alive"]}, {"label": "Chorus", "lines": ["Salt in the wound, that's all you bring", "But I don't have to let it sting", "You call it honesty, I call it aim", "I'm done living in that vein", "Salt in the wound, not again", "I found a way to let it heal instead"]}, {"label": "Bridge", "lines": ["Maybe I don't need the wound to prove I lived", "Maybe healing doesn't mean I forget", "Maybe grace is closing what you opened", "And walking out still owing you nothing yet"]}, {"label": "Final Chorus", "lines": ["Salt in the wound, that's all you bring", "But I don't have to let it sting", "You call it honesty, I call it aim", "I'm done living in that vein", "Salt in the wound, not again", "I found a way to let it heal instead", "Salt in the wound, over and done", "This is how the healing finally comes"]}], "trackNum": 8, "file": "https://cdn1.suno.ai/3d0d1e7e-1974-4433-be53-ac5fe81fc22a.mp3", "cover": "https://cdn2.suno.ai/image_3d0d1e7e-1974-4433-be53-ac5fe81fc22a.jpeg", "sunoUrl": "https://suno.com/song/3d0d1e7e-1974-4433-be53-ac5fe81fc22a"}, {"title": "Deafening Quiet", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["The house is quiet now, quieter than it's ever been", "No sirens in my chest, no static in the walls", "You just walked in and every alarm gave in", "First time in years nothing's screaming down these halls"]}, {"label": "Pre-Chorus", "lines": ["No warning, no wreckage, no waiting for a war", "Just this, just you, just something worth living for"]}, {"label": "Chorus", "lines": ["This deafening quiet", "Isn't empty, it's finally still", "Louder than the riot", "That used to be my only thrill", "Deafening, deafening", "The sound of peace I never thought I'd feel"]}, {"label": "Verse 2", "lines": ["I used to fill the silence just to hide the ache", "Chase the noise around so nothing caught me still", "Now the quiet holds me like it's got somewhere to be", "You didn't fix me, you just stayed until I could feel"]}, {"label": "Pre-Chorus", "lines": ["No warning, no wreckage, no bracing for the fall", "Just this, just you, the stillness after all"]}, {"label": "Chorus", "lines": ["This deafening quiet", "Isn't empty, it's finally still", "Louder than the riot", "That used to be my only thrill", "Deafening, deafening", "The sound of peace I never thought I'd feel"]}, {"label": "Bridge", "lines": ["Maybe peace was never loud to begin with", "Maybe I just never learned to trust the calm", "Maybe you're the reason I stopped flinching", "Every time the noise finally lifts"]}, {"label": "Final Chorus", "lines": ["This deafening quiet", "Isn't empty, it's finally still", "Louder than the riot", "That used to be my only thrill", "Deafening, deafening", "The sound of peace I never thought I'd feel", "Deafening, deafening", "And for once, it's real"]}], "trackNum": 9, "file": "https://cdn1.suno.ai/c4efa976-5912-4ed0-89df-471cef4caf0a.mp3", "cover": "https://cdn2.suno.ai/image_c4efa976-5912-4ed0-89df-471cef4caf0a.jpeg", "sunoUrl": "https://suno.com/song/c4efa976-5912-4ed0-89df-471cef4caf0a"}, {"title": "Cathedral of Static", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["We built a cathedral out of feedback and smoke", "Stained glass made of shattered speakers, pews of rust", "But something moved here that wasn't just broke", "Something holy rising up out of the dust"]}, {"label": "Pre-Chorus", "lines": ["Kneel down in the wreckage, kneel down in the noise", "This is still a sermon, still a kind of voice"]}, {"label": "Chorus", "lines": ["Welcome to the cathedral of static", "Where the choir screams and still finds grace", "Every hymn a hollow echo", "Turning into something sacred", "Cathedral of static, let it ring", "This is still a holy thing"]}, {"label": "Verse 2", "lines": ["The altar's made of broken amplifiers", "Stacked up high like something we could climb", "Every voice that ever reached for higher", "Found a little mercy on the climb"]}, {"label": "Pre-Chorus", "lines": ["Kneel down in the feedback, kneel down in the noise", "This is still a gospel, still a chosen voice"]}, {"label": "Chorus", "lines": ["Welcome to the cathedral of static", "Where the choir screams and still finds grace", "Every hymn a hollow echo", "Turning into something sacred", "Cathedral of static, let it ring", "This is still a holy thing"]}, {"label": "Bridge", "lines": ["Maybe this was always the temple", "Built from everything we couldn't say", "Maybe static was just the language", "Grace uses to find its way"]}, {"label": "Final Chorus", "lines": ["Welcome to the cathedral of static", "Where the choir screams and still finds grace", "Every hymn a hollow echo", "Turning into something sacred", "Cathedral of static, let it ring", "This is still a holy thing", "Cathedral of static, let it stand", "This was holy ground all along"]}], "trackNum": 10, "file": "https://cdn1.suno.ai/d6c6f8f0-5c1a-453e-b836-d7ef9e44b160.mp3", "cover": "https://cdn2.suno.ai/image_d6c6f8f0-5c1a-453e-b836-d7ef9e44b160.jpeg", "sunoUrl": "https://suno.com/song/d6c6f8f0-5c1a-453e-b836-d7ef9e44b160"}, {"title": "Fade to Analog", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Turn off the amplifiers, let the tubes go warm", "Somewhere between the needle and the grain", "There's a sound that doesn't need to transform", "Into something louder just to feel the same"]}, {"label": "Pre-Chorus", "lines": ["Let it hiss, let it hum", "Let the tape run slow", "This is the only frequency I trust", "The only station I still know"]}, {"label": "Chorus", "lines": ["So fade to analog with me", "Leave the static in the dark", "Every scratch and every hiss and every skip", "Feels more honest than a spark", "Fade to analog, fade to analog", "Let the needle find the groove", "Fade to analog, fade to analog", "This is the only truth I have to lose"]}, {"label": "Verse 2", "lines": ["I don't need the signal clean, I don't need it perfect", "I just need it real, I just need it slow", "Every imperfection makes it worth it", "Every flaw a place I still know"]}, {"label": "Pre-Chorus", "lines": ["Let it hiss, let it hum", "Let the tape run home", "This is the only frequency I trust", "The only static I don't have to atone"]}, {"label": "Chorus", "lines": ["So fade to analog with me", "Leave the static in the dark", "Every scratch and every hiss and every skip", "Feels more honest than a spark", "Fade to analog, fade to analog", "Let the needle find the groove", "Fade to analog, fade to analog", "This is the only truth I have to lose"]}, {"label": "Bridge", "lines": ["Maybe the static was just a language", "Maybe the noise was just a start", "Maybe fading out is how we finally", "Turn back into something warm, something like art"]}, {"label": "Final Chorus", "lines": ["So fade to analog with me", "Leave the static in the dark", "Every scratch and every hiss and every skip", "Feels more honest than a spark", "Fade to analog, fade to analog", "Let the needle find the groove", "Fade to analog, fade to analog", "This is the only truth I have to lose", "Fade to analog, fade to analog", "Let it hiss until it's gone", "Fade to analog, fade to analog", "This is how the static becomes a song"]}], "trackNum": 11, "file": "https://cdn1.suno.ai/6a14ce92-0f26-463e-a1c0-2f91f2243098.mp3", "cover": "https://cdn2.suno.ai/image_6a14ce92-0f26-463e-a1c0-2f91f2243098.jpeg", "sunoUrl": "https://suno.com/song/6a14ce92-0f26-463e-a1c0-2f91f2243098"}]}, "fracture": {"title": "Fracture", "songs": [{"title": "Split", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["There's two of me living in this skin", "One keeps building, one keeps tearing down", "I've been at war with who I could've been", "Since the day I learned to wear this crown"]}, {"label": "Pre-Chorus", "lines": ["Split down the middle, split at the seam", "But maybe broken doesn't mean the end of me"]}, {"label": "Chorus", "lines": ["I'm split between the wreckage and the light", "Split between the war and what comes after", "But every fracture's just a place where mercy finds a way in", "This is how I learn to be whole again"]}, {"label": "Verse 2", "lines": ["I used to think the split was permanent", "A line drawn deep I'd never cross", "But every day I choose which side I lean in", "And every day I'm choosing less the loss"]}, {"label": "Pre-Chorus", "lines": ["Split down the middle, split at the seam", "But maybe broken's just the shape of becoming"]}, {"label": "Chorus", "lines": ["I'm split between the wreckage and the light", "Split between the war and what comes after", "But every fracture's just a place where mercy finds a way in", "This is how I learn to be whole again"]}, {"label": "Bridge", "lines": ["Maybe I was never meant to be undivided", "Maybe grace lives right there in the crack", "Maybe the split's not something I have to hide from", "Maybe it's the doorway calling me back"]}, {"label": "Final Chorus", "lines": ["I'm split between the wreckage and the light", "Split between the war and what comes after", "But every fracture's just a place where mercy finds a way in", "This is how I learn to be whole again", "Split, but not broken", "Split, but still becoming", "Split, and finally moving", "Toward the one I'm meant to be"]}], "trackNum": 1, "file": "https://cdn1.suno.ai/3abe2e4a-cd51-4655-9b62-f8f116300591.mp3", "cover": "https://cdn2.suno.ai/image_3abe2e4a-cd51-4655-9b62-f8f116300591.jpeg", "sunoUrl": "https://suno.com/song/3abe2e4a-cd51-4655-9b62-f8f116300591"}, {"title": "Weight of Glass", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I've been carrying this weight of glass", "Afraid one wrong move and it all comes down", "But you took half the load without being asked", "Said \"fragile things still hold their ground\""]}, {"label": "Pre-Chorus", "lines": ["I thought the weight would break me", "I thought the glass was made to fall", "But some things carry light because they're breakable", "Not despite it, but because of it all"]}, {"label": "Chorus", "lines": ["This is the weight of glass", "Heavy, but it lets the light get through", "Every crack becomes a window", "Every edge becomes a view", "Weight of glass, weight of glass", "I'm not afraid to carry you"]}, {"label": "Verse 2", "lines": ["I used to hide the cracks, pretend I'm made of stone", "Terrified that fragile meant I'd fail", "But stone don't let the light in, stone stands alone", "Glass was built to bend, to hold, to sail"]}, {"label": "Pre-Chorus", "lines": ["I thought the weight would break me", "I thought the glass was made to fall", "But some things carry light because they're breakable", "Not despite it, but because of it all"]}, {"label": "Chorus", "lines": ["This is the weight of glass", "Heavy, but it lets the light get through", "Every crack becomes a window", "Every edge becomes a view", "Weight of glass, weight of glass", "I'm not afraid to carry you"]}, {"label": "Bridge", "lines": ["Maybe fragile was never a failure", "Maybe breakable's just another word for brave", "Maybe the weight of glass was always meant to show me", "Grace gets in through every crack it makes"]}, {"label": "Final Chorus", "lines": ["This is the weight of glass", "Heavy, but it lets the light get through", "Every crack becomes a window", "Every edge becomes a view", "Weight of glass, weight of glass", "I'm not afraid to carry you", "Weight of glass, weight of glass", "Finally letting the light come through"]}], "trackNum": 2, "file": "https://cdn1.suno.ai/065c67c4-b844-45ec-a29e-c0ca9ef83b2e.mp3", "cover": "https://cdn2.suno.ai/image_065c67c4-b844-45ec-a29e-c0ca9ef83b2e.jpeg", "sunoUrl": "https://suno.com/song/065c67c4-b844-45ec-a29e-c0ca9ef83b2e"}, {"title": "Fracture", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I used to think a fracture meant the end", "The moment something breaks, it's gone for good", "But you showed me how the bone grows back to bend", "Stronger at the break than where it stood"]}, {"label": "Pre-Chorus", "lines": ["So let it crack, let it give", "Something's finding room to live"]}, {"label": "Chorus", "lines": ["This is just a fracture", "Not the whole of who I am", "A line where something happened", "Not a verdict, not a stand", "Fracture, fracture", "Healing stronger than before", "Fracture, fracture", "This is not the final word"]}, {"label": "Verse 2", "lines": ["I keep waiting for the break to swallow me", "Keep bracing for the worst that never comes", "Every fracture that I thought would end me", "Just became the place where I'm becoming something"]}, {"label": "Pre-Chorus", "lines": ["So let it crack, let it give", "Something's finding room to live"]}, {"label": "Chorus", "lines": ["This is just a fracture", "Not the whole of who I am", "A line where something happened", "Not a verdict, not a stand", "Fracture, fracture", "Healing stronger than before", "Fracture, fracture", "This is not the final word"]}, {"label": "Bridge", "lines": ["Maybe every fracture's just an opening", "Maybe pain's the shape that mercy takes", "Maybe breaking down was always just beginning", "The slow and steady work of getting remade"]}, {"label": "Final Chorus", "lines": ["This is just a fracture", "Not the whole of who I am", "A line where something happened", "Not a verdict, not a stand", "Fracture, fracture", "Healing stronger than before", "Fracture, fracture", "This is not the final word", "Fracture, fracture", "I'm still standing, I'm still whole", "Fracture, fracture", "This was never gonna be my end"]}], "trackNum": 3, "file": "https://cdn1.suno.ai/a58be86c-3684-47a6-8557-5226553bd9d2.mp3", "cover": "https://cdn2.suno.ai/image_a58be86c-3684-47a6-8557-5226553bd9d2.jpeg", "sunoUrl": "https://suno.com/song/a58be86c-3684-47a6-8557-5226553bd9d2"}, {"title": "The Current", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I stopped fighting the current", "Stopped kicking against the tide", "Let it pull me under, let it carry me forward", "Turns out it was taking me somewhere I could survive"]}, {"label": "Pre-Chorus", "lines": ["I thought the current was the thing to fear", "But maybe it's the thing that gets me there"]}, {"label": "Chorus", "lines": ["So take me with the current", "Take me where it's going", "I'm done rowing against the current I don't own", "The current's not against me", "It's the only way back home", "Take me with the current", "I'm not drowning, I'm just being carried on"]}, {"label": "Verse 2", "lines": ["I used to think that letting go meant losing", "Meant I'd end up somewhere I couldn't come back from", "But every time I stopped my own choosing", "The current brought me closer to becoming something"]}, {"label": "Pre-Chorus", "lines": ["I thought the current was the thing to fear", "But maybe it's the thing that gets me there"]}, {"label": "Chorus", "lines": ["So take me with the current", "Take me where it's going", "I'm done rowing against the current I don't own", "The current's not against me", "It's the only way back home", "Take me with the current", "I'm not drowning, I'm just being carried on"]}, {"label": "Bridge", "lines": ["Maybe grace runs like a river underneath us", "Maybe surrender's not the same as giving in", "Maybe the current always knew the way to carry us", "Somewhere better than where we've always been"]}, {"label": "Final Chorus", "lines": ["So take me with the current", "Take me where it's going", "I'm done rowing against the current I don't own", "The current's not against me", "It's the only way back home", "Take me with the current", "I'm not drowning, I'm just being carried on", "Take me with the current", "Finally, finally home"]}], "trackNum": 4, "file": "https://cdn1.suno.ai/78822d86-29a2-45e5-b46a-3703ca934943.mp3", "cover": "https://cdn2.suno.ai/image_78822d86-29a2-45e5-b46a-3703ca934943.jpeg", "sunoUrl": "https://suno.com/song/78822d86-29a2-45e5-b46a-3703ca934943"}, {"title": "Ashes on My Tongue", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I've been chewing on the ashes of everything I said", "Every word that burned the both of us down", "But out of everything left dead", "There's a seed still growing underground"]}, {"label": "Pre-Chorus", "lines": ["Ash don't mean the end of growing", "Ash just means the fire's had its say"]}, {"label": "Chorus", "lines": ["I've got ashes on my tongue", "But something sweet is coming through", "Ashes on my tongue", "Turning into something new", "Ashes, ashes", "Beauty rising from the burn", "Ashes, ashes", "This is how I finally learn"]}, {"label": "Verse 2", "lines": ["I used to think the fire took everything", "Left nothing but the smoke and the regret", "But something in the burning made room for spring", "Something in the ruin, I haven't buried yet"]}, {"label": "Pre-Chorus", "lines": ["Ash don't mean the end of growing", "Ash just means the fire's had its say"]}, {"label": "Chorus", "lines": ["I've got ashes on my tongue", "But something sweet is coming through", "Ashes on my tongue", "Turning into something new", "Ashes, ashes", "Beauty rising from the burn", "Ashes, ashes", "This is how I finally learn"]}, {"label": "Bridge", "lines": ["Maybe the fire wasn't punishment", "Maybe it was pruning all along", "Maybe every field that burns down to nothing", "Comes back greener, comes back strong"]}, {"label": "Final Chorus", "lines": ["I've got ashes on my tongue", "But something sweet is coming through", "Ashes on my tongue", "Turning into something new", "Ashes, ashes", "Beauty rising from the burn", "Ashes, ashes", "This is how I finally learn", "Ashes, ashes", "Turning into gold", "Ashes, ashes", "This is how the new begins"]}], "trackNum": 5, "file": "https://cdn1.suno.ai/42c9174f-bca9-41b9-99ba-aee0eafd0eee.mp3", "cover": "https://cdn2.suno.ai/image_42c9174f-bca9-41b9-99ba-aee0eafd0eee.jpeg", "sunoUrl": "https://suno.com/song/42c9174f-bca9-41b9-99ba-aee0eafd0eee"}, {"title": "The Long Fall Down", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I've been falling for as long as I remember", "Waiting for the ground to finally arrive", "But somewhere in the fall I stopped the freefall panic", "Started noticing the sky I'm falling through, still alive"]}, {"label": "Pre-Chorus", "lines": ["Maybe falling's not the end of the story", "Maybe there's a hand still reaching out"]}, {"label": "Chorus", "lines": ["This is the long fall down", "But I'm not falling alone", "Something's slowing the descent", "Something's carrying me home", "The long fall down, the long fall down", "Turns out there's a net beneath the ground"]}, {"label": "Verse 2", "lines": ["I used to brace for impact every single day", "Sure that gravity would finally win", "But every time I thought I'd hit the bottom", "I found a hand instead of hitting land, again"]}, {"label": "Pre-Chorus", "lines": ["Maybe falling's not the end of the story", "Maybe there's a hand still reaching out"]}, {"label": "Chorus", "lines": ["This is the long fall down", "But I'm not falling alone", "Something's slowing the descent", "Something's carrying me home", "The long fall down, the long fall down", "Turns out there's a net beneath the ground"]}, {"label": "Bridge", "lines": ["Maybe grace was never at the bottom waiting", "Maybe grace has been here the whole way down", "Maybe every fall I thought would break me", "Was just the way I learned to trust the ground"]}, {"label": "Final Chorus", "lines": ["This is the long fall down", "But I'm not falling alone", "Something's slowing the descent", "Something's carrying me home", "The long fall down, the long fall down", "Turns out there's a net beneath the ground", "The long fall down, the long fall down", "And finally, finally, I land safe and sound"]}], "trackNum": 6, "file": "https://cdn1.suno.ai/8d7c32a0-477d-4c34-808a-0b1255afe4d7.mp3", "cover": "https://cdn2.suno.ai/image_8d7c32a0-477d-4c34-808a-0b1255afe4d7.jpeg", "sunoUrl": "https://suno.com/song/8d7c32a0-477d-4c34-808a-0b1255afe4d7"}, {"title": "Lost My Feathers in the Wind", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Wind took feathers off my shoulders", "Peeled them soft like fingers do", "Every one that let go easier", "Was one I didn't need to prove", "You caught the last one falling", "Held it like it mattered still", "Told me losing isn't leaving", "Told me falling has its skill"]}, {"label": "Pre-Chorus", "lines": ["Skin against the current", "Warm despite the chill", "Nothing lost is wasted", "When your hands are what I feel"]}, {"label": "Chorus", "lines": ["I lost my feathers in the wind", "And found your hands instead", "Every part of me that scattered", "Landed somewhere better, somewhere led", "Lost my feathers in the wind", "Turns out falling's how we met", "Nothing lost that wasn't traded", "For the weight of your caress"]}, {"label": "Verse 2", "lines": ["I used to hoard every feather", "Every piece I thought I'd need", "But you taught me hands hold better", "Than anything wings could ever keep", "Bare shoulders, open weather", "Nothing left to hide behind", "Just skin and wind and whatever", "Softness we could find"]}, {"label": "Pre-Chorus", "lines": ["Skin against the current", "Nothing needs to hide", "Nothing lost is wasted", "When you're pressed against my side"]}, {"label": "Chorus", "lines": ["I lost my feathers in the wind", "And found your hands instead", "Every part of me that scattered", "Landed somewhere better, somewhere led", "Lost my feathers in the wind", "Turns out falling's how we met", "Nothing lost that wasn't traded", "For the weight of your caress"]}, {"label": "Bridge", "lines": ["Trace the place where feathers used to be", "Trace it slow, like you're reading me", "Every bare spot, every soft undone", "Is just more skin for you to come find, come rest upon"]}, {"label": "Final Chorus", "lines": ["I lost my feathers in the wind", "And found your hands instead", "Every part of me that scattered", "Landed somewhere better, somewhere led", "Lost my feathers in the wind", "Turns out falling's how we met", "Nothing lost that wasn't traded", "For the weight of your caress", "I don't need them back", "Not with you this close", "Lost my feathers in the wind", "And landed where I'm home"]}], "trackNum": 7, "file": "https://cdn1.suno.ai/2dc017b9-e6bc-4874-9689-433247b2afc5.mp3", "cover": "https://cdn2.suno.ai/image_2dc017b9-e6bc-4874-9689-433247b2afc5.jpeg", "sunoUrl": "https://suno.com/song/2dc017b9-e6bc-4874-9689-433247b2afc5"}, {"title": "Negative Space", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["You left a shape behind", "Cut clean out of the light", "I keep tracing the outline", "Just to feel you close tonight", "Every empty room", "Still holds your frame", "Somehow that's enough", "To call it more than pain"]}, {"label": "Pre-Chorus", "lines": ["The gap doesn't swallow", "It just holds the shape", "Of everything that mattered", "Everything I couldn't waste"]}, {"label": "Chorus", "lines": ["I'm living in the space you left", "Not haunted, just aware", "There's a shape where you used to stand", "And it's still shaped like care", "Negative space", "Still drawn in your favor", "Negative space", "The absence I can savor"]}, {"label": "Verse 2", "lines": ["I stopped trying to fill the hole", "With whatever's passing through", "The silence has a shape", "And the shape looks just like you", "I don't need to erase it", "I just need to understand", "The empty isn't nothing", "It's the imprint of a hand"]}, {"label": "Pre-Chorus", "lines": ["The gap doesn't swallow", "It just holds the shape", "Of everything that mattered", "Everything I couldn't waste"]}, {"label": "Chorus", "lines": ["I'm living in the space you left", "Not haunted, just aware", "There's a shape where you used to stand", "And it's still shaped like care", "Negative space", "Still drawn in your favor", "Negative space", "The absence I can savor"]}, {"label": "Bridge", "lines": ["Some rooms stay lit", "Long after the lamp is gone", "The glow just lingers", "In the shape it's drawn", "I'm not filling this", "I'm just learning how to read", "Every line you left", "Is a kind of company"]}, {"label": "Final Chorus", "lines": ["I'm living in the space you left", "Not haunted, just aware", "There's a shape where you used to stand", "And it's still shaped like care", "Negative space", "Still drawn in your favor", "Negative space", "The absence I can savor", "I don't need you filled back in", "I just need the shape to stay", "This empty room still knows my name", "And that's enough to keep the faith"]}], "trackNum": 8, "file": "https://cdn1.suno.ai/6feb45d3-fad1-4c83-b915-ddac3c9bc448.mp3", "cover": "https://cdn2.suno.ai/image_6feb45d3-fad1-4c83-b915-ddac3c9bc448.jpeg", "sunoUrl": "https://suno.com/song/6feb45d3-fad1-4c83-b915-ddac3c9bc448"}, {"title": "Bad Blood Runs Deep", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I've got bad blood running in these veins", "Generations of the same mistake", "But I don't have to pass down all the pain", "I get to choose the patterns that I break"]}, {"label": "Pre-Chorus", "lines": ["It runs deep, but it don't have to run forever", "Deep don't mean I can't dig it out"]}, {"label": "Chorus", "lines": ["Bad blood runs deep", "But it stops with me", "I'm the one who finally", "Breaks the family tree", "Bad blood, bad blood", "Runs deep, but grace runs deeper still", "Bad blood, bad blood", "This is how I finally heal"]}, {"label": "Verse 2", "lines": ["I saw the pattern in my father's hands", "The way he flinched, the way he never stayed", "But I don't have to be the man", "Who passes down the very thing that made me afraid"]}, {"label": "Pre-Chorus", "lines": ["It runs deep, but it don't have to run forever", "Deep don't mean I can't dig it out"]}, {"label": "Chorus", "lines": ["Bad blood runs deep", "But it stops with me", "I'm the one who finally", "Breaks the family tree", "Bad blood, bad blood", "Runs deep, but grace runs deeper still", "Bad blood, bad blood", "This is how I finally heal"]}, {"label": "Bridge", "lines": ["Maybe the blood was never the whole story", "Maybe I get to write the ending clean", "Maybe every generation gets a chance at glory", "When somebody finally breaks the chain"]}, {"label": "Final Chorus", "lines": ["Bad blood runs deep", "But it stops with me", "I'm the one who finally", "Breaks the family tree", "Bad blood, bad blood", "Runs deep, but grace runs deeper still", "Bad blood, bad blood", "This is how I finally heal", "Bad blood, bad blood", "The line stops here, the line stops here"]}], "trackNum": 9, "file": "https://cdn1.suno.ai/e512aaf5-dccc-4f84-9e91-b31270d4258f.mp3", "cover": "https://cdn2.suno.ai/image_e512aaf5-dccc-4f84-9e91-b31270d4258f.jpeg", "sunoUrl": "https://suno.com/song/e512aaf5-dccc-4f84-9e91-b31270d4258f"}, {"title": "Shatterproof", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I used to be the kind of glass that shattered", "At the smallest kind of impact, smallest kind of blow", "But everything that broke me also mattered", "Every crack became the way I learned to grow"]}, {"label": "Pre-Chorus", "lines": ["Now I'm tempered, now I'm tested", "Now I know exactly what I'm made of"]}, {"label": "Chorus", "lines": ["Throw the hardest thing you've got", "I've been dropped before, I'm still here", "Every crack just proved me", "Nothing's disappearing", "I'm shatterproof", "Cracked and tempered", "Harder now", "Than ever"]}, {"label": "Verse 2", "lines": ["I've survived the drops I thought would end me", "Survived the falls that should have made me dust", "But every impact taught this glass to bend, see", "Every fracture built a different kind of trust"]}, {"label": "Pre-Chorus", "lines": ["Now I'm tempered, now I'm tested", "Now I know exactly what I'm made of"]}, {"label": "Chorus", "lines": ["Throw the hardest thing you've got", "I've been dropped before, I'm still here", "Every crack just proved me", "Nothing's disappearing", "I'm shatterproof", "Cracked and tempered", "Harder now", "Than ever"]}, {"label": "Bridge", "lines": ["There's a difference between untouched and unbroken", "One never had to prove a thing", "The other took every hit on the chin", "And kept the shape it came to bring"]}, {"label": "Final Chorus", "lines": ["Throw the hardest thing you've got", "I've been dropped before, I'm still here", "Every crack just proved me", "Nothing's disappearing", "I'm shatterproof", "Cracked and tempered", "Harder now", "Than ever", "I already know how I land"]}], "trackNum": 10, "file": "https://cdn1.suno.ai/20bac264-21b1-4b1a-b564-aa9d6fd40e5d.mp3", "cover": "https://cdn2.suno.ai/image_20bac264-21b1-4b1a-b564-aa9d6fd40e5d.jpeg", "sunoUrl": "https://suno.com/song/20bac264-21b1-4b1a-b564-aa9d6fd40e5d"}, {"title": "What's Left of Me", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Take the name off the door", "Take the armor, take the noise", "Somewhere under all that weight", "There's still the shape of a voice", "I used to think I'd disappear", "If I let it all go", "Turns out disappearing", "Was the only way to know"]}, {"label": "Pre-Chorus", "lines": ["What's left isn't nothing", "It's not the wreckage either", "It's just quieter", "And a little more believer"]}, {"label": "Chorus", "lines": ["This is what's left of me", "Smaller, but it's true", "Not everything I built", "Just everything that grew", "What's left, what's left", "Still standing after the fall", "What's left, what's left", "Might be all I ever needed at all"]}, {"label": "Verse 2", "lines": ["I kept adding things to prove I'm worth it", "Titles, weight, a thousand different faces", "Then one by one I lost them", "And found more room in all those spaces", "Nobody warned me emptying out", "Could feel this much like arriving", "What's left of me got lighter", "And somehow it's what's keeping me alive"]}, {"label": "Pre-Chorus", "lines": ["What's left isn't nothing", "It's not the wreckage either", "It's just quieter", "And a little more believer"]}, {"label": "Chorus", "lines": ["This is what's left of me", "Smaller, but it's true", "Not everything I built", "Just everything that grew", "What's left, what's left", "Still standing after the fall", "What's left, what's left", "Might be all I ever needed at all"]}, {"label": "Bridge", "lines": ["I don't need the version", "That needed to be seen", "I just need the one still standing", "Underneath everything", "That one's small", "That one's plain", "That one somehow", "Survived the flames"]}, {"label": "Final Chorus", "lines": ["This is what's left of me", "Smaller, but it's true", "Not everything I built", "Just everything that grew", "What's left, what's left", "Still standing after the fall", "What's left, what's left", "Turns out it was enough after all", "This is what's left of me", "And I finally like what I see"]}], "trackNum": 11, "file": "https://cdn1.suno.ai/50385ee7-731c-484b-953e-de724e3101f5.mp3", "cover": "https://cdn2.suno.ai/image_50385ee7-731c-484b-953e-de724e3101f5.jpeg", "sunoUrl": "https://suno.com/song/50385ee7-731c-484b-953e-de724e3101f5"}]}, "afterlight": {"title": "Afterlight", "songs": [{"title": "Afterlight", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Somewhere between the dark going out", "And the sun deciding to stay", "There's a color I don't have a name for yet", "Not quite night, not quite day", "I've been standing in that gap for years", "Waiting to see which way it goes", "Turns out it was never really waiting", "It was becoming something I didn't know"]}, {"label": "Pre-Chorus", "lines": ["The dark isn't gone", "It just moved over", "Made room for something", "I almost missed"]}, {"label": "Chorus", "lines": ["Call it afterlight if you want a name for it", "The hour when the worst has already had its say", "And something softer comes to stand behind it", "Not the dawn exactly, just enough to find the way"]}, {"label": "Verse 2", "lines": ["I used to think the story ended", "Wherever the dark got the final word", "But I woke up one morning still breathing", "And that was the first I'd heard", "Of whatever this is, this in-between hour", "Where the wreckage gets a little less loud", "And the shape of everything I survived", "Starts looking less like something to hide"]}, {"label": "Pre-Chorus", "lines": ["The dark isn't finished", "But neither am I", "Whatever's left standing", "Gets to decide"]}, {"label": "Chorus", "lines": ["Call it afterlight if you want a name for it", "The hour when the worst has already had its say", "And something softer comes to stand behind it", "Not the dawn exactly, just enough to find the way"]}, {"label": "Bridge", "lines": ["I don't need the sun all at once", "Just this much will do", "A little bit of afterlight", "Is still light coming through", "It's not victory", "It's just morning", "And morning's enough", "For now"]}, {"label": "Final Chorus", "lines": ["Call it afterlight if you want a name for it", "The hour when the worst has already had its say", "And something softer comes to stand behind it", "Not the dawn exactly, just enough to find the way", "Whatever's left of the night", "It doesn't get to keep me", "I'm already standing in the part", "Where the light starts winning"]}], "trackNum": 1, "file": "https://cdn1.suno.ai/13d3eceb-da1d-4a5f-b6c8-4e3126962a8d.mp3", "cover": "https://cdn2.suno.ai/image_13d3eceb-da1d-4a5f-b6c8-4e3126962a8d.jpeg", "sunoUrl": "https://suno.com/song/13d3eceb-da1d-4a5f-b6c8-4e3126962a8d"}, {"title": "Ember", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Everyone thought the fire was finished", "Swept the ash, called it done", "But nobody checked underneath it", "Where I kept just one", "Small, stubborn, quiet", "Refusing to go out", "Not much to look at", "But it never doubted"]}, {"label": "Pre-Chorus", "lines": ["It doesn't roar", "It just stays lit", "That's all it's ever", "Had to do with it"]}, {"label": "Chorus", "lines": ["I'm just an ember, not a wildfire", "Small enough to carry, hard enough to keep", "Everyone's out here chasing bigger flames", "I just needed one that wouldn't go to sleep", "This is not nothing", "This is enough", "A little bit of burning", "Underneath the rough"]}, {"label": "Verse 2", "lines": ["You can't warm a house with an ember alone", "But you can get through the night", "And sometimes getting through the night", "Is the only kind of fight", "I stopped needing to be the whole blaze", "Stopped needing the roar", "I just needed proof that something in me", "Was still worth reaching for"]}, {"label": "Pre-Chorus", "lines": ["It doesn't announce", "It just holds on", "That's the only kind", "Of proof I need"]}, {"label": "Chorus", "lines": ["I'm just an ember, not a wildfire", "Small enough to carry, hard enough to keep", "Everyone's out here chasing bigger flames", "I just needed one that wouldn't go to sleep", "This is not nothing", "This is enough", "A little bit of burning", "Underneath the rough"]}, {"label": "Bridge", "lines": ["Wind came through here", "Tried to take it out", "It bent low", "But it didn't go", "Some things", "You can't blow out", "Some things", "Just wait you out"]}, {"label": "Final Chorus", "lines": ["I'm just an ember, not a wildfire", "Small enough to carry, hard enough to keep", "Everyone's out here chasing bigger flames", "I just needed one that wouldn't go to sleep", "This is not nothing", "This is enough", "A little bit of burning", "Underneath the rough", "Give it time", "Give it air", "It's not much", "But it's still there"]}], "trackNum": 2, "file": "https://cdn1.suno.ai/e9fc890f-cd5b-4275-b3f7-8dd9b3828686.mp3", "cover": "https://cdn2.suno.ai/image_e9fc890f-cd5b-4275-b3f7-8dd9b3828686.jpeg", "sunoUrl": "https://suno.com/song/e9fc890f-cd5b-4275-b3f7-8dd9b3828686"}, {"title": "Where the Fire Was", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I walked back to the field after everyone told me not to", "Expected black dirt, expected nothing left to see", "But there was green pushing up through where the fire used to be", "Small and stubborn, growing anyway, growing out of me"]}, {"label": "Pre-Chorus", "lines": ["How does anything grow here", "After everything that burned", "Maybe the ground remembers", "Every lesson that it learned"]}, {"label": "Chorus", "lines": ["Where the fire was", "There's something green now", "Where the fire was", "I finally see how", "Burning down isn't the same as burning out", "This is what the after looks like", "This is what the after's about"]}, {"label": "Verse 2", "lines": ["I used to avoid this place entirely", "Couldn't stand to see what used to stand here", "But grief doesn't ask permission to turn into something", "And somewhere in the waiting, the ground got clear"]}, {"label": "Pre-Chorus", "lines": ["How does anything grow here", "When the roots were torched to dust", "Maybe it was never really over", "Maybe over was a story I made up"]}, {"label": "Chorus", "lines": ["Where the fire was", "There's something green now", "Where the fire was", "I finally see how", "Burning down isn't the same as burning out", "This is what the after looks like", "This is what the after's about"]}, {"label": "Bridge", "lines": ["Blackened stumps", "Turned into fence posts", "Ash turned into soil", "Soil turned into rows", "Nobody plants a garden", "On purpose, in the wreck", "But here we are", "And here it grows"]}, {"label": "Final Chorus", "lines": ["Where the fire was", "There's something green now", "Where the fire was", "I finally see how", "Burning down isn't the same as burning out", "This is what the after looks like", "This is what the after's about", "Where the fire was", "I'm planting something new", "Where the fire was", "Turns out the ground was always good, all the way through"]}], "trackNum": 3, "file": "https://cdn1.suno.ai/6e99591e-9325-4d2b-857a-8c0aaf5ea53e.mp3", "cover": "https://cdn2.suno.ai/image_6e99591e-9325-4d2b-857a-8c0aaf5ea53e.jpeg", "sunoUrl": "https://suno.com/song/6e99591e-9325-4d2b-857a-8c0aaf5ea53e"}, {"title": "Learning to Breathe", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["In through the nose", "Four counts, hold", "Out through the mouth", "Let it go", "I used to think that panic", "Was just how I was wired", "Turns out I just never learned", "The thing my lungs required"]}, {"label": "Pre-Chorus", "lines": ["Slow down", "That's the whole assignment", "Slow down", "Nothing else required"]}, {"label": "Chorus", "lines": ["I'm learning to breathe", "Like it's not a race against something", "Learning to breathe", "Like the air was always free", "No rush, no flinch", "No bracing for the worst", "Just learning to breathe", "Like breathing comes first"]}, {"label": "Verse 2", "lines": ["I spent so many years", "Holding it all in my chest", "Like letting go of tension", "Meant letting go of the rest", "But turns out my shoulders", "Were never built to hold the sky", "I can put it down now", "And still remember how to fly"]}, {"label": "Pre-Chorus", "lines": ["Slow down", "Nobody's timing this", "Slow down", "There's no version of this you can miss"]}, {"label": "Chorus", "lines": ["I'm learning to breathe", "Like it's not a race against something", "Learning to breathe", "Like the air was always free", "No rush, no flinch", "No bracing for the worst", "Just learning to breathe", "Like breathing comes first"]}, {"label": "Bridge", "lines": ["In", "Hold", "Out", "Still here", "In", "Hold", "Out", "Still clear"]}, {"label": "Final Chorus", "lines": ["I'm learning to breathe", "Like it's not a race against something", "Learning to breathe", "Like the air was always free", "No rush, no flinch", "No bracing for the worst", "Just learning to breathe", "Like breathing comes first", "I'm learning to breathe", "And for once, I'm not counting the cost"]}], "trackNum": 4, "file": "https://cdn1.suno.ai/7a9bab2e-b5cd-42e7-beff-65e1d3270373.mp3", "cover": "https://cdn2.suno.ai/image_7a9bab2e-b5cd-42e7-beff-65e1d3270373.jpeg", "sunoUrl": "https://suno.com/song/7a9bab2e-b5cd-42e7-beff-65e1d3270373"}, {"title": "Storm Behind Glass", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["The storm's still out there", "Throwing everything it's got", "Trees bending sideways", "Sky the color of a bruise", "But I'm just watching through the window", "Dry, and warm, and unafraid", "Been a long time since a storm", "Didn't get to ruin my day"]}, {"label": "Pre-Chorus", "lines": ["Rage all you want", "I'm not going anywhere", "Rage all you want", "I've got somewhere warm in here"]}, {"label": "Chorus", "lines": ["It's a storm behind glass now", "Loud, but it can't reach", "Every thing that used to flood me", "Just breaks against the beach", "I can watch it happen", "Without drowning anymore", "That's the difference", "Between then and this before"]}, {"label": "Verse 2", "lines": ["I used to run outside to meet it", "Thought surviving meant getting soaked", "Thought the only way to prove I'm strong", "Was standing in it till I broke", "Nobody told me shelter", "Wasn't the same as running scared", "Nobody told me watching from safety", "Still means I was there"]}, {"label": "Pre-Chorus", "lines": ["Rage all you want", "I've got a roof that holds", "Rage all you want", "I'm not out there in the cold"]}, {"label": "Chorus", "lines": ["It's a storm behind glass now", "Loud, but it can't reach", "Every thing that used to flood me", "Just breaks against the beach", "I can watch it happen", "Without drowning anymore", "That's the difference", "Between then and this before"]}, {"label": "Bridge", "lines": ["Lightning cracks the sky in half", "I don't flinch the way I did", "Just refill the coffee", "Watch the wind take the lid", "The storm's not gone", "It's just outside now", "That's not denial", "That's finally knowing how"]}, {"label": "Final Chorus", "lines": ["It's a storm behind glass now", "Loud, but it can't reach", "Every thing that used to flood me", "Just breaks against the beach", "I can watch it happen", "Without drowning anymore", "That's the difference", "Between then and this before", "It's a storm behind glass", "And I'm still, and I'm dry", "Let it rage all it wants", "I'm not going back outside"]}], "trackNum": 5, "file": "https://cdn1.suno.ai/5a6cf9db-a557-4efd-bd9b-a3174930135e.mp3", "cover": "https://cdn2.suno.ai/image_5a6cf9db-a557-4efd-bd9b-a3174930135e.jpeg", "sunoUrl": "https://suno.com/song/5a6cf9db-a557-4efd-bd9b-a3174930135e"}, {"title": "Paper Thin", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I used to build my walls thick", "Concrete, steel, no cracks", "Took me years to understand", "Thin was letting something back", "Paper doesn't stop the light", "It just lets it through instead", "I spent so long being stone", "When I could've just been read"]}, {"label": "Pre-Chorus", "lines": ["Thin enough to tear", "Thin enough to see"]}, {"label": "Chorus", "lines": ["I'm paper thin these days", "Not because I'm breaking", "Because I finally let you", "See right through the shaking", "Paper thin, paper thin", "Doesn't mean I'm coming apart", "It means for once", "You can read my heart"]}, {"label": "Verse 2", "lines": ["You held me like you knew", "Exactly how much I could take", "Didn't crush what was already fragile", "Didn't test it just to watch it break", "Turns out paper thin", "Isn't a weakness to defend", "It's just honesty", "Wearing its truest skin"]}, {"label": "Pre-Chorus", "lines": ["Thin enough to fold", "Thin enough to hold"]}, {"label": "Chorus", "lines": ["I'm paper thin these days", "Not because I'm breaking", "Because I finally let you", "See right through the shaking", "Paper thin, paper thin", "Doesn't mean I'm coming apart", "It means for once", "You can read my heart"]}, {"label": "Bridge", "lines": ["Every letter ever written", "That mattered", "Was written on something thin enough to carry", "Thin enough to fold into a pocket", "Thin enough to keep"]}, {"label": "Final Chorus", "lines": ["I'm paper thin these days", "Not because I'm breaking", "Because I finally let you", "See right through the shaking", "Paper thin, paper thin", "Doesn't mean I'm coming apart", "It means for once", "You can read my heart", "Paper thin", "And still worth keeping", "Paper thin", "And finally worth reading"]}], "trackNum": 6, "file": "https://cdn1.suno.ai/f33c7366-fb4c-4449-8c00-72e4097406a0.mp3", "cover": "https://cdn2.suno.ai/image_f33c7366-fb4c-4449-8c00-72e4097406a0.jpeg", "sunoUrl": "https://suno.com/song/f33c7366-fb4c-4449-8c00-72e4097406a0"}, {"title": "Northbound", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I've spent so long circling", "The same five miles of doubt", "Every road looked like the one before", "Every turn just spat me back out", "Then something shifted quiet", "Some kind of internal thaw", "And for the first time in years", "I could feel which way was north"]}, {"label": "Pre-Chorus", "lines": ["Point me anywhere but backward", "That's the only rule I've got", "Point me anywhere that's forward", "Even if it's not the spot"]}, {"label": "Chorus", "lines": ["I'm northbound now", "Windows down, nothing to prove", "Northbound now", "Finally know which way to move", "Doesn't matter how long the road is", "Doesn't matter what's behind", "I'm northbound", "And for once, I like what's up ahead in mind"]}, {"label": "Verse 2", "lines": ["I used to think that lost meant broken", "Meant I'd never find my way", "But lost was just the necessary detour", "Before I understood the day", "Every wrong turn taught the map", "Where the actual roads collide", "Now I've got a direction", "Instead of just a place to hide"]}, {"label": "Pre-Chorus", "lines": ["Point me anywhere but sideways", "Circling isn't a plan", "Point me anywhere that's honest", "I'll figure out the rest by hand"]}, {"label": "Chorus", "lines": ["I'm northbound now", "Windows down, nothing to prove", "Northbound now", "Finally know which way to move", "Doesn't matter how long the road is", "Doesn't matter what's behind", "I'm northbound", "And for once, I like what's up ahead in mind"]}, {"label": "Bridge", "lines": ["Mile marker one:", "I stopped looking back", "Mile marker two:", "The doubt lost track", "Mile marker three:", "Turns out the road", "Was pointing home", "The whole time"]}, {"label": "Final Chorus", "lines": ["I'm northbound now", "Windows down, nothing to prove", "Northbound now", "Finally know which way to move", "Doesn't matter how long the road is", "Doesn't matter what's behind", "I'm northbound", "And for once, I like what's up ahead in mind", "Northbound, northbound", "Every mile feels like arriving", "Northbound, northbound", "Finally, finally driving"]}], "trackNum": 7, "file": "https://cdn1.suno.ai/1563e26f-9e3a-4799-bcbc-9ce4006caea9.mp3", "cover": "https://cdn2.suno.ai/image_1563e26f-9e3a-4799-bcbc-9ce4006caea9.jpeg", "sunoUrl": "https://suno.com/song/1563e26f-9e3a-4799-bcbc-9ce4006caea9"}, {"title": "Rebuild", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Pick up the boards", "Pick up the nails", "Doesn't matter", "That the first one failed", "Measure twice", "Cut once", "Slower this time", "Wiser this time"]}, {"label": "Pre-Chorus", "lines": ["Hand me the hammer", "Hand me the level", "Hand me whatever", "Gets us through this"]}, {"label": "Chorus", "lines": ["We're gonna rebuild", "Brick by brick, beam by beam", "Nothing fancy", "Just something that'll hold", "We're gonna rebuild", "Not the same as it was before", "Better this time", "Because we know what the walls are for"]}, {"label": "Verse 2", "lines": ["I used to think rebuilding", "Meant erasing what came down", "But every board we're using", "Came from the same old ground", "We're not pretending", "Nothing ever fell", "We're just building something", "That knows how to stand this time as well"]}, {"label": "Pre-Chorus", "lines": ["Hand me the patience", "Hand me the time", "Hand me whatever", "Gets this thing aligned"]}, {"label": "Chorus", "lines": ["We're gonna rebuild", "Brick by brick, beam by beam", "Nothing fancy", "Just something that'll hold", "We're gonna rebuild", "Not the same as it was before", "Better this time", "Because we know what the walls are for"]}, {"label": "Bridge", "lines": ["This isn't quick", "This isn't clean", "This is showing up", "Day after day between", "The rubble and the roof", "That's not built yet", "This is just the work", "Nobody sees but us yet"]}, {"label": "Final Chorus", "lines": ["We're gonna rebuild", "Brick by brick, beam by beam", "Nothing fancy", "Just something that'll hold", "We're gonna rebuild", "Not the same as it was before", "Better this time", "Because we know what the walls are for", "We're rebuilding", "And it's already standing", "We're rebuilding", "Come inside, we're almost there"]}], "trackNum": 8, "file": "https://cdn1.suno.ai/e5bf2880-1a36-4c8d-a588-13a49a796ef9.mp3", "cover": "https://cdn2.suno.ai/image_e5bf2880-1a36-4c8d-a588-13a49a796ef9.jpeg", "sunoUrl": "https://suno.com/song/e5bf2880-1a36-4c8d-a588-13a49a796ef9"}, {"title": "Wrong Way Home", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["I took every wrong turn this city had to offer", "Missed exits, dead ends, roads that just quit", "But somewhere between the wrong way and the maybe", "I ended up exactly where I needed to sit", "Funny how the detour", "Taught me more than the map", "Funny how getting lost", "Was really just a longer way back"]}, {"label": "Pre-Chorus", "lines": ["Nobody plans it this way", "Nobody chooses the long road on purpose", "But here I am anyway", "And somehow that's not worthless"]}, {"label": "Chorus", "lines": ["Guess I took the wrong way home", "Took the long one, took the hard one", "But every wrong way I have gone", "Still somehow led me to this front door", "So call it the wrong way if you want to", "I call it the way I got here", "Wrong way home", "Still home, still here"]}, {"label": "Verse 2", "lines": ["I used to punish myself for the mileage", "Every year I thought I wasted, thought I lost", "But maybe nothing on that road was wasted", "Maybe I needed every single cost", "The scenic route through hell", "Still counts as getting through", "And every wrong way I ever went", "Somehow pointed back to you"]}, {"label": "Pre-Chorus", "lines": ["Nobody plans the hard road", "Nobody signs up for the flat tire", "But here I am anyway", "And I like where I ended up higher"]}, {"label": "Chorus", "lines": ["Guess I took the wrong way home", "Took the long one, took the hard one", "But every wrong way I have gone", "Still somehow led me to this front door", "So call it the wrong way if you want to", "I call it the way I got here", "Wrong way home", "Still home, still here"]}, {"label": "Bridge", "lines": ["Ask me if I'd do it different", "Honestly, I don't know", "The wrong way taught my hands", "How to finally let go", "Of the plan", "Of the map", "Of the need", "To never crack"]}, {"label": "Final Chorus", "lines": ["Guess I took the wrong way home", "Took the long one, took the hard one", "But every wrong way I have gone", "Still somehow led me to this front door", "So call it the wrong way if you want to", "I call it the way I got here", "Wrong way home", "Still home", "Still here", "Wrong way home", "And I wouldn't change a mile of it"]}], "trackNum": 9, "file": "https://cdn1.suno.ai/295e963e-8f77-40aa-b69c-18f07f1194b7.mp3", "cover": "https://cdn2.suno.ai/image_295e963e-8f77-40aa-b69c-18f07f1194b7.jpeg", "sunoUrl": "https://suno.com/song/295e963e-8f77-40aa-b69c-18f07f1194b7"}, {"title": "Under the Paint", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["Somebody painted over", "What I used to be", "Layer after layer", "Of who I was supposed to be", "Colors that weren't mine", "Covering the frame", "Until I couldn't even recognize", "My own name"]}, {"label": "Pre-Chorus", "lines": ["Careful now", "Don't strip it all at once", "Careful now", "Some of this takes months"]}, {"label": "Chorus", "lines": ["There's something under the paint", "Something older, something true", "A version of me", "Nobody got around to ruin", "Under the paint, under the paint", "There's a color I forgot I had", "Under the paint, under the paint", "Turns out it isn't sad"]}, {"label": "Verse 2", "lines": ["I spent so long adding coats", "Trying to cover up the cracks", "Didn't know the thing worth saving", "Was already underneath, already intact", "Restoration isn't building something new", "It's just carefully taking away", "Every layer that was never you", "Until what's true can finally see the day"]}, {"label": "Pre-Chorus", "lines": ["Careful now", "This part's still tender", "Careful now", "This part I still remember"]}, {"label": "Chorus", "lines": ["There's something under the paint", "Something older, something true", "A version of me", "Nobody got around to ruin", "Under the paint, under the paint", "There's a color I forgot I had", "Under the paint, under the paint", "Turns out it isn't sad"]}, {"label": "Bridge", "lines": ["A little turpentine", "A little patience", "A steady hand", "That isn't rushing", "Under the gray", "Under the beige", "Under everything", "I thought I had to be", "There's color"]}, {"label": "Final Chorus", "lines": ["There's something under the paint", "Something older, something true", "A version of me", "Nobody got around to ruin", "Under the paint, under the paint", "There's a color I forgot I had", "Under the paint, under the paint", "Turns out it isn't sad", "Under the paint", "I found the whole original", "Under the paint", "I'm finally visible"]}], "trackNum": 10, "file": "https://cdn1.suno.ai/2697179d-5301-4ada-9444-92b2978953ba.mp3", "cover": "https://cdn2.suno.ai/image_2697179d-5301-4ada-9444-92b2978953ba.jpeg", "sunoUrl": "https://suno.com/song/2697179d-5301-4ada-9444-92b2978953ba"}, {"title": "After the Burn", "instrumental": false, "sections": [{"label": "Verse 1", "lines": ["They say some forests need the fire", "To crack the seeds wide open", "Says the thing that looks like ending", "Is just how the growing's spoken", "I didn't choose the burn", "But I didn't run from it either", "And now there's something growing", "That the old woods never could deliver"]}, {"label": "Pre-Chorus", "lines": ["So let the smoke clear", "Let the ground cool", "Let the new thing", "Take its time to bloom"]}, {"label": "Chorus", "lines": ["After the burn", "There's always something greener", "After the burn", "The ground gets a little clearer", "I'm not who I was", "Before everything came down", "But I like this version better", "The one still standing, still around"]}, {"label": "Verse 2", "lines": ["I used to think that surviving", "Was the most that I could ask", "But something in the after", "Is asking me for more than that", "Not just breathing", "Not just getting by", "Something in this new ground", "Is finally teaching me to try"]}, {"label": "Pre-Chorus", "lines": ["So let the smoke clear", "Let the old fears cool", "Let the new thing", "Prove that it was always true"]}, {"label": "Chorus", "lines": ["After the burn", "There's always something greener", "After the burn", "The ground gets a little clearer", "I'm not who I was", "Before everything came down", "But I like this version better", "The one still standing, still around"]}, {"label": "Bridge", "lines": ["Every fracture led here", "Every fire had a reason", "Every hollow filled back up", "Slow, but in its season", "I'm not afraid to say", "The worst of it made room", "For everything that's growing", "In whatever's left of me to bloom"]}, {"label": "Final Chorus", "lines": ["After the burn", "There's always something greener", "After the burn", "The ground gets a little clearer", "I'm not who I was", "Before everything came down", "But I like this version better", "The one still standing, still around", "After the burn", "I'm finally home", "After the burn", "I'm finally, finally grown"]}], "trackNum": 11, "file": "https://cdn1.suno.ai/d9ca418f-0c7e-4ab8-9b9a-4d3fcbf55626.mp3", "cover": "https://cdn2.suno.ai/image_d9ca418f-0c7e-4ab8-9b9a-4d3fcbf55626.jpeg", "sunoUrl": "https://suno.com/song/d9ca418f-0c7e-4ab8-9b9a-4d3fcbf55626"}]}};
+
+const COVERS = {
+  static: "Cover_Static.png",
+  fracture: "Cover_Fracture.png",
+  afterlight: "Cover_Afterlight.png"
+};
+const ALBUM_META = {
+  static: { desc: "Noise, disconnection, and reaching through anyway." },
+  fracture: { desc: "Breaking points that don't end in ruin." },
+  afterlight: { desc: "What survives, and what it's becoming." }
+};
+
+const homeEl = document.getElementById('home');
+
+// ---- fullscreen toggle ----
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const fullscreenIcon = document.getElementById('fullscreenIcon');
+const EXPAND_PATHS = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const COMPRESS_PATHS = '<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>';
+
+function updateFullscreenIcon(){
+  fullscreenIcon.innerHTML = document.fullscreenElement ? COMPRESS_PATHS : EXPAND_PATHS;
+}
+fullscreenBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+});
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+const playerEl = document.getElementById('player');
+const tracklistEl = document.getElementById('tracklist');
+const contentArea = document.getElementById('contentArea');
+const lyricsPanel = document.getElementById('lyricsPanel');
+const audioEl = document.getElementById('audioEl');
+
+let currentAlbum = null;
+let playingAlbum = null;
+let playingIndex = -1;
+let isPlaying = false;
+let viewAlbum = null;
+let viewIndex = -1;
+
+function fmtTime(sec){
+  if (!isFinite(sec) || sec == null) return '0:00';
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ':' + String(s).padStart(2,'0');
+}
+
+function renderTrack(song, albumKey){
+  const div = document.createElement('div');
+  div.className = 'track';
+  div.dataset.album = albumKey;
+  div.dataset.index = song.trackNum - 1;
+
+  div.innerHTML = `
+    <div class="track-row">
+      <button class="track-playbtn glitch-hover" title="Play / Pause">
+        <svg class="playicon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="pauseicon" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        <span class="eq"><span></span><span></span><span></span></span>
+      </button>
+      <div class="track-title-wrap">
+        <div class="track-title"><span class="tnum">${String(song.trackNum).padStart(2,'0')}</span>${song.title}</div>
+      </div>
+    </div>`;
+
+  div.querySelector('.track-playbtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const idx = song.trackNum - 1;
+    if (playingAlbum === albumKey && playingIndex === idx){
+      if (audioEl.paused) audioEl.play(); else audioEl.pause();
+    } else {
+      playTrack(albumKey, idx);
+    }
+  });
+  div.addEventListener('click', () => {
+    viewTrack(albumKey, song.trackNum - 1);
+  });
+  return div;
+}
+
+function renderLyricsPanel(song){
+  if (!song){ lyricsPanel.innerHTML = ''; return; }
+
+  const sectionsHtml = song.sections.map(s => `
+    <div class="lyrics-section">
+      <div class="sec-label">[${s.label}]</div>
+      ${s.lines.map(l => `<p>${l}</p>`).join('')}
+    </div>`).join('');
+  const plain = song.sections.map(s => `[${s.label}]\n${s.lines.join('\n')}`).join('\n\n');
+
+  const sunoLink = song.sunoUrl
+    ? `<a href="${song.sunoUrl}" target="_blank" rel="noopener" class="suno-link">Open in Suno ↗</a>`
+    : '';
+
+  lyricsPanel.innerHTML = `
+    <div class="lyrics-panel-head">
+      <div>
+        <div class="lyrics-panel-title">${song.title}</div>
+        <div class="lyrics-panel-tag">Lyrics</div>
+        ${sunoLink}
+      </div>
+      <button class="copy-btn glitch-hover">Copy lyrics</button>
+    </div>
+    <div class="lyrics">${sectionsHtml}</div>`;
+
+  lyricsPanel.querySelector('.copy-btn').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(plain).then(() => {
+      const btn = e.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+    });
+  });
+}
+
+function syncContentArea(){
+  document.querySelectorAll('.track').forEach(t => {
+    const isViewed = t.dataset.album === viewAlbum && parseInt(t.dataset.index) === viewIndex;
+    t.classList.toggle('viewing', isViewed);
+  });
+  if (viewAlbum === currentAlbum && viewIndex > -1){
+    contentArea.classList.add('playing');
+    const song = DATA[viewAlbum].songs[viewIndex];
+    renderLyricsPanel(song);
+  } else {
+    contentArea.classList.remove('playing');
+    lyricsPanel.innerHTML = '';
+  }
+  syncPanelNav();
+}
+
+function viewTrack(albumKey, index){
+  viewAlbum = albumKey;
+  viewIndex = index;
+  syncContentArea();
+}
+
+function openAlbum(albumKey){
+  currentAlbum = albumKey;
+  const album = DATA[albumKey];
+  document.getElementById('playerCover').src = COVERS[albumKey];
+  document.getElementById('albumTitle').textContent = album.title;
+  document.getElementById('albumSub').textContent = ALBUM_META[albumKey].desc;
+  document.getElementById('albumMeta').innerHTML = `${album.songs.length} Tracks`;
+  playerEl.setAttribute('data-accent', albumKey);
+
+  tracklistEl.innerHTML = '';
+  album.songs.forEach(song => tracklistEl.appendChild(renderTrack(song, albumKey)));
+  refreshNowPlayingHighlight();
+  syncContentArea();
+
+  homeEl.style.display = 'none';
+  playerEl.style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+document.querySelectorAll('.cover-card').forEach(card => {
+  card.addEventListener('click', () => openAlbum(card.getAttribute('data-album')));
+});
+document.getElementById('backBtn').addEventListener('click', () => {
+  playerEl.style.display = 'none';
+  homeEl.style.display = 'flex';
+  window.scrollTo(0,0);
+});
+document.getElementById('playAlbumBtn').addEventListener('click', () => {
+  if (currentAlbum) playTrack(currentAlbum, 0);
+});
+
+const npStatus = document.getElementById('np-status');
+const npPlayIcon = document.getElementById('np-play-icon');
+const npSeek = document.getElementById('np-seek');
+const npTime = document.getElementById('np-time');
+const npDuration = document.getElementById('np-duration');
+const nowplayingEl = document.getElementById('nowplaying');
+
+function syncBarPadding(){
+  if (document.body.classList.contains('has-player')){
+    const navH = (panelNav && panelNav.style.display === 'flex') ? panelNav.offsetHeight : 0;
+    document.body.style.paddingBottom = (nowplayingEl.offsetHeight + navH) + 'px';
+  } else {
+    document.body.style.paddingBottom = '';
+  }
+}
+window.addEventListener('resize', syncBarPadding);
+window.addEventListener('orientationchange', () => setTimeout(syncBarPadding, 150));
+
+const npToggle = document.getElementById('npToggle');
+
+function setCollapsed(collapsed){
+  nowplayingEl.classList.toggle('collapsed', collapsed);
+  syncBarPadding();
+  syncPanelNav();
+}
+
+let npDragStartY = null;
+let npDragMoved = false;
+
+npToggle.addEventListener('pointerdown', (e) => {
+  npDragStartY = e.clientY;
+  npDragMoved = false;
+  npToggle.setPointerCapture(e.pointerId);
+});
+npToggle.addEventListener('pointermove', (e) => {
+  if (npDragStartY === null) return;
+  if (Math.abs(e.clientY - npDragStartY) > 6) npDragMoved = true;
+});
+npToggle.addEventListener('pointerup', (e) => {
+  if (npDragStartY === null) return;
+  const deltaY = e.clientY - npDragStartY;
+  const SWIPE_THRESHOLD = 12;
+  if (Math.abs(deltaY) > SWIPE_THRESHOLD){
+    setCollapsed(deltaY > 0);
+  } else {
+    setCollapsed(!nowplayingEl.classList.contains('collapsed'));
+  }
+  npDragStartY = null;
+});
+
+// ---- mobile panel nav (tracks / lyrics swipe) ----
+const panelNav = document.getElementById('panelNav');
+const panelNavBtns = Array.from(panelNav.querySelectorAll('button'));
+const MOBILE_BREAKPOINT = 900;
+
+function isMobileLayout(){
+  return window.innerWidth <= MOBILE_BREAKPOINT;
+}
+
+function getPanelCols(){
+  return [
+    contentArea.querySelector('.tracklist-col'),
+    contentArea.querySelector('.lyrics-col'),
+  ];
+}
+
+function syncPanelHeight(index){
+  if (!isMobileLayout() || !contentArea.classList.contains('playing')) {
+    contentArea.style.height = '';
+    return;
+  }
+  const cols = getPanelCols();
+  const active = cols[index];
+  if (active){
+    contentArea.style.height = active.scrollHeight + 'px';
+  }
+}
+
+function currentPanelIndex(){
+  return Math.round(contentArea.scrollLeft / Math.max(1, contentArea.clientWidth));
+}
+
+function syncPanelNav(){
+  const show = isMobileLayout() && contentArea.classList.contains('playing');
+  panelNav.style.display = show ? 'flex' : 'none';
+  nowplayingEl.style.bottom = show ? panelNav.offsetHeight + 'px' : '0px';
+  syncBarPadding();
+  if (show){
+    requestAnimationFrame(() => syncPanelHeight(currentPanelIndex()));
+  } else {
+    contentArea.style.height = '';
+  }
+}
+
+function goToPanel(index){
+  const width = contentArea.clientWidth;
+  syncPanelHeight(index);
+  contentArea.scrollTo({ left: index * width, behavior: 'smooth' });
+  panelNavBtns.forEach((b, i) => b.classList.toggle('active', i === index));
+}
+
+panelNavBtns.forEach(btn => {
+  btn.addEventListener('click', () => goToPanel(parseInt(btn.dataset.panel, 10)));
+});
+
+let panelScrollRAF = null;
+contentArea.addEventListener('scroll', () => {
+  if (!isMobileLayout() || !contentArea.classList.contains('playing')) return;
+  if (panelScrollRAF) cancelAnimationFrame(panelScrollRAF);
+  panelScrollRAF = requestAnimationFrame(() => {
+    const idx = currentPanelIndex();
+    panelNavBtns.forEach((b, i) => b.classList.toggle('active', i === idx));
+    syncPanelHeight(idx);
+  });
+});
+
+window.addEventListener('resize', syncPanelNav);
+
+function playTrack(albumKey, index){
+  const album = DATA[albumKey];
+  const song = album.songs[index];
+  if (!song) return;
+
+  playingAlbum = albumKey;
+  playingIndex = index;
+  viewAlbum = albumKey;
+  viewIndex = index;
+
+  document.getElementById('np-cover').src = song.cover || COVERS[albumKey];
+  document.getElementById('np-title').textContent = song.title;
+  document.getElementById('np-album').textContent = album.title;
+  document.body.classList.add('has-player');
+  npStatus.textContent = '';
+  npStatus.classList.remove('err');
+  requestAnimationFrame(syncBarPadding);
+
+  audioEl.src = /^https?:\/\//.test(song.file)
+    ? song.file
+    : song.file.split('/').map(encodeURIComponent).join('/');
+  audioEl.play().then(() => {
+    isPlaying = true;
+    updatePlayIcon();
+  }).catch(() => {});
+
+  refreshNowPlayingHighlight();
+  syncContentArea();
+}
+
+audioEl.addEventListener('error', () => {
+  if (playingIndex === -1) return;
+  npStatus.textContent = 'Audio file not found — add mp3s to match the tracklist filenames';
+  npStatus.classList.add('err');
+  isPlaying = false;
+  updatePlayIcon();
+});
+
+audioEl.addEventListener('play', () => { isPlaying = true; updatePlayIcon(); });
+audioEl.addEventListener('pause', () => { isPlaying = false; updatePlayIcon(); });
+audioEl.addEventListener('ended', () => { nextTrack(); });
+audioEl.addEventListener('loadedmetadata', () => {
+  npSeek.max = audioEl.duration || 0;
+  npDuration.textContent = fmtTime(audioEl.duration);
+});
+audioEl.addEventListener('timeupdate', () => {
+  if (!isSeeking){
+    npSeek.value = audioEl.currentTime;
+    npTime.textContent = fmtTime(audioEl.currentTime);
+  }
+});
+
+let isSeeking = false;
+npSeek.addEventListener('input', () => { isSeeking = true; npTime.textContent = fmtTime(npSeek.value); });
+npSeek.addEventListener('change', () => { audioEl.currentTime = npSeek.value; isSeeking = false; });
+
+// ---- volume ----
+const npMute = document.getElementById('np-mute');
+const npVolIcon = document.getElementById('np-vol-icon');
+const npVolSlider = document.getElementById('np-vol-slider');
+let lastVolume = 1;
+
+function loadStoredVolume(){
+  try {
+    const stored = localStorage.getItem('trilogy-volume');
+    return stored !== null ? parseFloat(stored) : 1;
+  } catch (e) { return 1; }
+}
+function storeVolume(v){
+  try { localStorage.setItem('trilogy-volume', v); } catch (e) {}
+}
+
+function updateVolumeIcon(){
+  const v = audioEl.volume;
+  let path;
+  if (v === 0 || audioEl.muted){
+    path = '<path d="M16.5 12l3.5 3.5-1.5 1.5L15 13.5 11.5 17 10 15.5l3.5-3.5L10 8.5 11.5 7 15 10.5 18.5 7l1.5 1.5z"/><path d="M3 10v4h4l5 5V5L7 10H3z"/>';
+  } else if (v < 0.5){
+    path = '<path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>';
+  } else {
+    path = '<path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+  }
+  npVolIcon.innerHTML = path;
+  npVolSlider.value = audioEl.muted ? 0 : v;
+}
+
+const initialVolume = loadStoredVolume();
+audioEl.volume = initialVolume;
+npVolSlider.value = initialVolume;
+lastVolume = initialVolume || 1;
+updateVolumeIcon();
+
+npVolSlider.addEventListener('input', () => {
+  const v = parseFloat(npVolSlider.value);
+  audioEl.muted = false;
+  audioEl.volume = v;
+  if (v > 0) lastVolume = v;
+  storeVolume(v);
+  updateVolumeIcon();
+});
+
+npMute.addEventListener('click', () => {
+  if (audioEl.muted || audioEl.volume === 0){
+    audioEl.muted = false;
+    audioEl.volume = lastVolume || 1;
+    storeVolume(audioEl.volume);
+  } else {
+    lastVolume = audioEl.volume;
+    audioEl.muted = true;
+  }
+  updateVolumeIcon();
+});
+
+function updatePlayIcon(){
+  npPlayIcon.innerHTML = isPlaying
+    ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+  refreshNowPlayingHighlight();
+}
+
+function refreshNowPlayingHighlight(){
+  document.querySelectorAll('.track').forEach(t => {
+    const isThis = t.dataset.album === playingAlbum && parseInt(t.dataset.index) === playingIndex;
+    t.classList.toggle('current', isThis);
+    t.classList.toggle('now-playing', isThis && isPlaying);
+  });
+}
+
+document.getElementById('np-play').addEventListener('click', () => {
+  if (playingIndex === -1) return;
+  if (audioEl.paused) audioEl.play(); else audioEl.pause();
+});
+document.getElementById('np-next').addEventListener('click', nextTrack);
+document.getElementById('np-prev').addEventListener('click', prevTrack);
+
+function nextTrack(){
+  if (!playingAlbum) return;
+  const songs = DATA[playingAlbum].songs;
+  if (playingIndex < songs.length - 1){
+    playTrack(playingAlbum, playingIndex + 1);
+  } else {
+    isPlaying = false;
+    updatePlayIcon();
+  }
+}
+function prevTrack(){
+  if (!playingAlbum) return;
+  if (audioEl.currentTime > 3){
+    audioEl.currentTime = 0;
+    return;
+  }
+  if (playingIndex > 0){
+    playTrack(playingAlbum, playingIndex - 1);
+  }
+}
+</script>
+
+</body>
+</html>
