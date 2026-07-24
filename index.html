@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Static / Fracture / Afterlight — Lyrics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#050608;
@@ -33,7 +33,7 @@
     margin:0;
     background:var(--bg);
     color:var(--text);
-    font-family:'Rajdhani',sans-serif;
+    font-family:'Cormorant Garamond',serif;
     overflow-x:hidden;
     position:relative;
   }
@@ -43,67 +43,57 @@
     inset:0;
     pointer-events:none;
     background:
-      repeating-linear-gradient(to bottom, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px),
       radial-gradient(1400px 900px at 50% 0%, rgba(201,162,75,0.05), transparent 60%);
     z-index:9999;
     mix-blend-mode:overlay;
   }
-  h1,h2,h3{font-family:'Orbitron',sans-serif; margin:0;}
+  h1,h2,h3{font-family:'Cinzel',serif; margin:0;}
 
-  /* ============ HUD UTILITIES ============ */
+  /* ============ ENGRAVED FRAME UTILITIES ============ */
   .hud-frame{ position:relative; }
-  .hud-frame::before, .hud-frame::after{
+  .hud-frame::before{
     content:"";
     position:absolute;
-    width:18px; height:18px;
-    border-color:var(--gold);
-    border-style:solid;
+    inset:6px;
+    border:1px solid var(--gold);
+    opacity:0.35;
     pointer-events:none;
-    opacity:0.85;
     z-index:5;
-    transition:border-color 0.3s ease;
+    transition:border-color 0.3s ease, opacity 0.3s ease;
   }
-  .hud-frame::before{ top:8px; left:8px; border-width:2px 0 0 2px; }
-  .hud-frame::after{ bottom:8px; right:8px; border-width:0 2px 2px 0; }
 
   .hud-tag{
     display:flex;
     align-items:center;
-    gap:7px;
-    font-family:'Orbitron',sans-serif;
-    font-size:0.6rem;
-    letter-spacing:2.5px;
+    gap:10px;
+    font-family:'Cinzel',serif;
+    font-size:0.62rem;
+    letter-spacing:3px;
     text-transform:uppercase;
     color:var(--dim2);
     margin-bottom:10px;
   }
-  .hud-tag::before{
+  .hud-tag::after{
     content:"";
-    width:5px; height:5px;
-    border-radius:50%;
-    background:currentColor;
-    box-shadow:0 0 6px currentColor;
+    flex:1;
+    height:1px;
+    background:linear-gradient(to right, currentColor, transparent);
+    opacity:0.5;
   }
 
-  @keyframes glitchFlicker{
-    0%,100%{ transform:translate(0,0); }
-    20%{ transform:translate(-1.5px,1px); }
-    40%{ transform:translate(1.5px,-1px); }
-    60%{ transform:translate(-1px,0); }
-    80%{ transform:translate(1px,0); }
+  @keyframes engravedGlow{
+    0%,100%{ filter:brightness(1); }
+    50%{ filter:brightness(1.18); }
   }
-  .glitch-hover:hover{ animation:glitchFlicker 0.22s steps(2) 1; }
+  .glitch-hover:hover{ animation:engravedGlow 0.5s ease 1; }
 
-  #player[data-accent="static"] .hud-frame::before,
-  #player[data-accent="static"] .hud-frame::after{ border-color:var(--static); }
+  #player[data-accent="static"] .hud-frame::before{ border-color:var(--static); }
   #player[data-accent="static"] .hud-tag{ color:var(--static); }
 
-  #player[data-accent="fracture"] .hud-frame::before,
-  #player[data-accent="fracture"] .hud-frame::after{ border-color:var(--fracture); }
+  #player[data-accent="fracture"] .hud-frame::before{ border-color:var(--fracture); }
   #player[data-accent="fracture"] .hud-tag{ color:var(--fracture); }
 
-  #player[data-accent="afterlight"] .hud-frame::before,
-  #player[data-accent="afterlight"] .hud-frame::after{ border-color:var(--afterlight); }
+  #player[data-accent="afterlight"] .hud-frame::before{ border-color:var(--afterlight); }
   #player[data-accent="afterlight"] .hud-tag{ color:var(--afterlight); }
 
   body.has-player{ /* padding-bottom set dynamically in JS */ }
@@ -138,25 +128,15 @@
     width:640px; height:640px;
     max-width:150vw;
     border-radius:50%;
-    background:
-      repeating-radial-gradient(circle at center,
-        rgba(201,162,75,0.10) 0px, rgba(201,162,75,0.10) 1px,
-        transparent 1px, transparent 46px);
-    mask-image:radial-gradient(circle at center, black 0%, transparent 68%);
-    -webkit-mask-image:radial-gradient(circle at center, black 0%, transparent 68%);
+    background:radial-gradient(circle at center, rgba(201,162,75,0.14), transparent 62%);
     pointer-events:none;
     z-index:0;
-    animation:ringDrift 40s linear infinite;
-  }
-  @keyframes ringDrift{
-    0%{ transform:rotate(0deg); }
-    100%{ transform:rotate(360deg); }
   }
   .logo{
     position:relative;
     z-index:1;
-    font-family:'Orbitron',sans-serif;
-    font-weight:900;
+    font-family:'Cinzel',serif;
+    font-weight:600;
     font-size:4.4rem;
     letter-spacing:14px;
     text-align:center;
@@ -168,7 +148,7 @@
   .tagline{
     text-align:center;
     color:var(--gold);
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.85rem;
     letter-spacing:6px;
     text-transform:uppercase;
@@ -189,7 +169,7 @@
     font-size:0.8rem;
     letter-spacing:2px;
     text-transform:uppercase;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
   }
 
   .covers{
@@ -204,7 +184,7 @@
   .cover-card{
     position:relative;
     cursor:pointer;
-    border-radius:6px;
+    border-radius:3px;
     overflow:hidden;
     border:1px solid var(--border);
     background:var(--panel);
@@ -262,7 +242,7 @@
     animation:pulse-ring 2s ease-out infinite;
   }
   .cover-placeholder .cp-text{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.66rem;
     letter-spacing:2px;
     text-transform:uppercase;
@@ -286,7 +266,7 @@
     background:linear-gradient(180deg, var(--panel), var(--panel2));
   }
   .cover-card .cap .albumno{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.68rem;
     letter-spacing:3px;
     color:var(--dim2);
@@ -295,7 +275,7 @@
   .cover-card[data-album="fracture"] .cap .albumno{ color:var(--fracture); }
   .cover-card[data-album="afterlight"] .cap .albumno{ color:var(--afterlight); }
   .cover-card .cap .albumname{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:1.05rem;
     margin-top:4px;
     letter-spacing:1px;
@@ -333,7 +313,7 @@
     font-size:0.72rem;
     letter-spacing:2px;
     text-transform:uppercase;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     text-align:center;
   }
 
@@ -358,18 +338,18 @@
     background:transparent;
     border:1px solid var(--border);
     color:var(--dim);
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.72rem;
     letter-spacing:2px;
     text-transform:uppercase;
     padding:9px 16px;
-    border-radius:5px;
+    border-radius:3px;
     cursor:pointer;
     transition:all 0.2s ease;
   }
   .back-btn:hover{ color:var(--gold); border-color:var(--gold); }
   .top-bar .wm{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     letter-spacing:3px;
     font-size:0.78rem;
     color:var(--dim2);
@@ -391,17 +371,17 @@
     align-items:center;
     justify-content:center;
     overflow:hidden;
-    border-radius:6px;
+    border-radius:3px;
   }
   .cover-section img{
     width:100%;
     height:100%;
     object-fit:cover;
-    border-radius:6px;
+    border-radius:3px;
     display:block;
   }
   .cover-section .album-title{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:1.5rem;
     margin-top:22px;
     letter-spacing:1px;
@@ -417,7 +397,7 @@
   .cover-section .accent-bar{ height:2px; width:56px; margin:16px auto 0; border-radius:2px; }
   .cover-section .meta{
     margin-top:18px;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.7rem;
     letter-spacing:1.5px;
     color:var(--dim2);
@@ -429,12 +409,12 @@
     background:transparent;
     border:1px solid var(--gold);
     color:var(--gold);
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.75rem;
     letter-spacing:2px;
     text-transform:uppercase;
     padding:11px 26px;
-    border-radius:5px;
+    border-radius:3px;
     cursor:pointer;
     transition:background 0.2s ease;
   }
@@ -464,7 +444,7 @@
   .track{
     background:var(--panel);
     border:1px solid var(--border);
-    border-radius:8px;
+    border-radius:3px;
     overflow:hidden;
     position:relative;
     transition:border-color 0.2s ease, background 0.2s ease;
@@ -500,7 +480,7 @@
     color:var(--dim);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.78rem;
     transition:all 0.15s ease;
     position:relative;
@@ -528,7 +508,7 @@
   .track-title{ font-size:1.05rem; letter-spacing:0.3px; color:var(--text); }
   .tnum{
     display:inline-block;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.75rem;
     color:var(--dim2);
     letter-spacing:0.5px;
@@ -549,7 +529,7 @@
   .lyrics-panel{
     background:var(--panel);
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:4px;
     padding:26px 30px 30px;
     min-height:200px;
   }
@@ -563,14 +543,14 @@
     margin-bottom:18px;
   }
   .lyrics-panel-title{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:1.15rem;
     letter-spacing:0.5px;
     color:var(--text);
   }
   .lyrics-panel-tag{
     margin-top:6px;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.65rem;
     letter-spacing:2px;
     text-transform:uppercase;
@@ -579,7 +559,7 @@
   .suno-link{
     display:inline-block;
     margin-top:8px;
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.62rem;
     letter-spacing:1.5px;
     text-transform:uppercase;
@@ -595,8 +575,8 @@
     border:1px solid var(--gold);
     color:var(--gold);
     padding:6px 14px;
-    border-radius:5px;
-    font-family:'Orbitron',sans-serif;
+    border-radius:3px;
+    font-family:'Cinzel',serif;
     font-size:0.62rem;
     letter-spacing:1.5px;
     text-transform:uppercase;
@@ -608,7 +588,7 @@
 
   .lyrics-section{ margin-bottom:16px; font-family:Georgia,serif; }
   .lyrics-section .sec-label{
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.68rem;
     letter-spacing:2px;
     text-transform:uppercase;
@@ -694,7 +674,7 @@
   #np-info{ width:190px; flex-shrink:0; overflow:hidden; }
   #np-title{ font-size:0.95rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #np-album{
-    font-family:'Orbitron',sans-serif; font-size:0.62rem; letter-spacing:1.5px; text-transform:uppercase;
+    font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:1.5px; text-transform:uppercase;
     color:var(--dim2); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   #np-controls{ display:flex; align-items:center; gap:16px; flex-shrink:0; }
@@ -707,7 +687,7 @@
   #np-play{ width:38px; height:38px; border:1px solid var(--gold); border-radius:50%; }
   #np-play svg{ width:16px; height:16px; }
   #np-progress-wrap{ flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
-  #np-time, #np-duration{ font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--dim2); min-width:38px; }
+  #np-time, #np-duration{ font-family:'Cinzel',serif; font-size:0.68rem; color:var(--dim2); min-width:38px; }
   #np-seek{
     flex:1; -webkit-appearance:none; appearance:none; height:3px; border-radius:2px;
     background:var(--border); outline:none; cursor:pointer;
@@ -718,7 +698,7 @@
   }
   #np-seek::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--gold); border:none; box-shadow:0 0 6px rgba(201,162,75,0.6); }
   #np-status{
-    font-family:'Orbitron',sans-serif; font-size:0.62rem; letter-spacing:1px; color:var(--dim2);
+    font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:1px; color:var(--dim2);
     white-space:nowrap; flex-shrink:0; max-width:220px; overflow:hidden; text-overflow:ellipsis;
   }
   #np-status.err{ color:#e0685f; }
@@ -809,7 +789,7 @@
     }
     .track-title{ font-size:0.92rem; }
     .tnum{ font-size:0.68rem; margin-right:7px; }
-    .track{ border-radius:5px; }
+    .track{ border-radius:3px; }
     .covers{
       display:flex;
       flex-direction:row;
@@ -852,7 +832,7 @@
     background:transparent;
     border:1px solid var(--border);
     color:var(--dim);
-    font-family:'Orbitron',sans-serif;
+    font-family:'Cinzel',serif;
     font-size:0.66rem;
     letter-spacing:1.5px;
     text-transform:uppercase;
