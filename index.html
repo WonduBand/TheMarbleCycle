@@ -211,11 +211,14 @@
     filter:saturate(0.92) brightness(0.92);
     transition:filter 0.35s ease, transform 0.6s ease;
   }
-  .cover-card:hover .cover-frame-home img{ filter:saturate(1.1) brightness(1.05); transform:scale(1.035); }
-  .cover-card:hover{ transform:translateY(-6px); }
-  .cover-card[data-album="static"]:hover{ box-shadow:0 18px 50px -12px rgba(184,52,42,0.35); border-color:var(--static-dim); }
-  .cover-card[data-album="fracture"]:hover{ box-shadow:0 18px 50px -12px rgba(111,174,149,0.35); border-color:var(--fracture-dim); }
-  .cover-card[data-album="afterlight"]:hover{ box-shadow:0 18px 50px -12px rgba(232,147,90,0.35); border-color:var(--afterlight-dim); }
+  @media (hover: hover) and (pointer: fine){
+    .cover-card:hover .cover-frame-home img{ filter:saturate(1.1) brightness(1.05); transform:scale(1.035); }
+    .cover-card:hover{ transform:translateY(-6px); }
+    .cover-card[data-album="static"]:hover{ box-shadow:0 18px 50px -12px rgba(184,52,42,0.35); border-color:var(--static-dim); }
+    .cover-card[data-album="fracture"]:hover{ box-shadow:0 18px 50px -12px rgba(111,174,149,0.35); border-color:var(--fracture-dim); }
+    .cover-card[data-album="afterlight"]:hover{ box-shadow:0 18px 50px -12px rgba(232,147,90,0.35); border-color:var(--afterlight-dim); }
+    .cover-card:hover .play-overlay{ opacity:1; background:rgba(5,6,8,0.28); }
+  }
 
   .cover-placeholder{
     display:flex;
@@ -303,7 +306,6 @@
     pointer-events:none;
     transition:opacity 0.3s ease, background 0.3s ease;
   }
-  .cover-card:hover .play-overlay{ opacity:1; background:rgba(5,6,8,0.28); }
   .play-overlay .ring{
     width:56px; height:56px; border-radius:50%;
     border:1.5px solid rgba(233,235,241,0.85);
