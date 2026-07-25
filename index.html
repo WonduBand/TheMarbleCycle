@@ -192,10 +192,13 @@
     border:1px solid var(--border);
     background:var(--panel);
     transition:transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    display:flex;
+    flex-direction:column;
   }
   .cover-frame-home{
     width:100%;
     aspect-ratio:1/1;
+    flex-shrink:0;
     background:var(--panel2);
     display:flex;
     align-items:center;
@@ -272,6 +275,7 @@
     background:linear-gradient(180deg, var(--panel), var(--panel2));
     border-bottom-left-radius:3px;
     border-bottom-right-radius:3px;
+    flex:1;
   }
   .cover-card .cap .albumno{
     font-family:'Cinzel',serif;
